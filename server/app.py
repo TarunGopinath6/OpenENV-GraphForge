@@ -1,17 +1,17 @@
-"""GraphForge OpenENV server — uses openenv-core create_app factory."""
+"""GraphForge AST-query OpenENV server — uses openenv-core create_app factory."""
 
 from __future__ import annotations
 
 from openenv.core import create_app
 
-from models import GraphAction, GraphObservation
-from server.environment import GraphForgeEnvironment
+from models import ASTAction, ASTObservation
+from server.ast_environment import ASTEnvironment
 
 app = create_app(
-    GraphForgeEnvironment,
-    GraphAction,
-    GraphObservation,
-    env_name="graphforge",
+    ASTEnvironment,
+    ASTAction,
+    ASTObservation,
+    env_name="graphforge-ast",
     max_concurrent_envs=4,
 )
 

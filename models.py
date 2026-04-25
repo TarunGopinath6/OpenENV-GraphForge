@@ -1,6 +1,8 @@
 """Pydantic models for the GraphForge OpenENV environment.
 
 Complete type hierarchy for graph state, actions, observations, and task specs.
+Includes models for both the original GraphForge graph-construction environment
+and the AST-query episode environment.
 """
 
 from __future__ import annotations
@@ -233,3 +235,71 @@ class GraphForgeState(State):
     last_test_results: Optional[List[TestResult]] = None
     action_history: List[Tuple[str, str]] = Field(default_factory=list)
     # action_history entries: (action_type, json-serialized parameters)
+
+
+# ---------------------------------------------------------------------------
+# AST-query episode models
+# ---------------------------------------------------------------------------
+
+AST_ACTION_TYPES = Literal[
+    "get_neighbors",
+    "add_node",
+    "modify_node",
+    "delete_node",
+    "submit",
+]
+
+ALL_AST_ACTION_TYPES: List[str] = [
+    "get_neighbors",
+    "add_node",
+    "modify_node",
+    "delete_node",
+    "submit",
+]
+
+
+class ASTActionResult(BaseModel):
+    """Outcome of one AST-episode action."""
+
+    success: bool
+    action_type: str
+    message: str = ""
+    added_node_ids: List[str] = Field(default_factory=list)
+
+
+class ASTAction(Action):
+    """Action sent to the AST-query environment."""
+
+    action_type: AST_ACTION_TYPES
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ASTObservation(Observation):
+    """Observation returned by the AST-query environment on each step."""
+
+    episode_id: str = ""
+    timestep: int = 0
+    query: str = ""
+    central_node: str = ""
+    context_nodes: Dict[str, Any] = Field(default_factory=dict)
+    context_edges: List[Dict[str, Any]] = Field(default_factory=list)
+    not_found_nodes: List[str] = Field(default_factory=list)
+    mutations_so_far: List[Dict[str, Any]] = Field(default_factory=list)
+    last_action_result: Optional[ASTActionResult] = None
+    available_actions: List[str] = Field(default_factory=list)
+
+
+class ASTState(State):
+    """Full internal state of one AST-query episode."""
+
+    episode_id: str = ""
+    step_count: int = 0
+    query_obj: Dict[str, Any] = Field(default_factory=dict)
+    graph_pkl_path: str = ""
+    base_dir: str = ""
+    context_nodes: Dict[str, Any] = Field(default_factory=dict)
+    context_edges: List[Dict[str, Any]] = Field(default_factory=list)
+    not_found_nodes: List[str] = Field(default_factory=list)
+    mutations: List[Dict[str, Any]] = Field(default_factory=list)
+    is_terminal: bool = False
+    log_path: str = ""

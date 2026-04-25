@@ -1,0 +1,7 @@
+======================================================================
+EPISODE START  id=99b3b813-dee8-4957-965d-b60eaec8fa78
+Query      : Please add a scale(self, factor: int) method to the FenwickTree class. This method should multiply every element in the tree by the given factor. Implement this efficiently in O(N) time. Include a docstring and a doctest.
+Central    : ./codebases/fenwick_tree.py::FenwickTree
+Graph      : fenwick_tree.py.pkl
+Context    : 13 nodes, 12 edges
+======================================================================

@@ -188,7 +188,7 @@ def process_query(query_obj, G, base_dir: str):
 
         try:
             response = client.beta.chat.completions.parse(
-                model="gpt-4o",
+                model="gpt-5.2",
                 messages=[
                     {"role": "system", "content": "You are a technical assistant for AST manipulation. You output structured JSON."},
                     {"role": "user", "content": prompt_text}
@@ -260,9 +260,6 @@ def main():
 
         updated = False
         for q in queries:
-            if "llm_result" in q:
-                continue
-
             print(f"Processing Query: {q.get('task') or q.get('prompt')}")
             mutations, reasoning = process_query(q, G, base_dir)
 

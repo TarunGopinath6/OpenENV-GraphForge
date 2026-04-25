@@ -1,0 +1,49 @@
+======================================================================
+EPISODE START  id=cd1ad2a2-0bd1-4712-886c-89d92f7d5c55
+Query      : Please add a scale(self, factor: int) method to the FenwickTree class. This method should multiply every element in the tree by the given factor. Implement this efficiently in O(N) time. Include a docstring and a doctest.
+Central    : ./codebases/fenwick_tree.py::FenwickTree
+Graph      : fenwick_tree.py.pkl
+Context    : 13 nodes, 12 edges
+======================================================================
+
+[Step 1] add_node
+  params   : {"node_id": "./codebases/fenwick_tree.py::FenwickTree::scale", "reasoning": "test"}
+  result   : ADD mutation recorded for ./codebases/fenwick_tree.py::FenwickTree::scale
+  reasoning: test
+  code     :
+def scale(self, factor: int) -> None:
+    """Scale all values in the Fenwick tree by ``factor`` in O(N).
+
+    This multiplies every element of the underlying array by ``factor``.
+    Since each Fenwick node stores a sum of some subset of elements,
+    multiplying every stored partial sum by the same factor yields the
+    correct scaled tree.
+
+    Parameters:
+        factor (int): multiplier to apply to every element
+
+    Returns:
+        None
+
+    >>> f = FenwickTree([1, 2, 3, 4, 5])
+    >>> f.scale(3)
+    >>> f.get_array()
+    [3, 6, 9, 12, 15]
+    """
+    # Each entry in `self.tree` is a partial sum; scaling all partial sums
+    # scales the represented array elements as well.
+    for i in range(self.size):
+        self.tree[i] *= factor
+
+
+[Step 2] submit
+  params   : {}
+  result   : Episode submitted with 1 mutation(s)
+
+======================================================================
+EPISODE END
+Steps      : 2
+Mutations  : 1
+  [1] ADD      ./codebases/fenwick_tree.py::FenwickTree::scale
+       test
+======================================================================

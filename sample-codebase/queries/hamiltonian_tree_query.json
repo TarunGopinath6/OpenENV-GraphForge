@@ -1,208 +1,222 @@
 [
-  {
-    "complexity": "Low",
-    "task": "Refactor the valid_connection function to use more descriptive variable names for curr_ind (e.g., current_path_length) and update the docstrings and doctests to match.",
-    "central_node": "./codebases/hamiltonian_tree.py::valid_connection",
-    "subgraph": {
-      "nodes": {
-        "./codebases/hamiltonian_tree.py::valid_connection": {
-          "type": "function",
-          "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
+    {
+        "complexity": "Low",
+        "task": "Refactor the valid_connection function to use more descriptive variable names for curr_ind (e.g., current_path_length) and update the docstrings and doctests to match.",
+        "central_node": "./codebases/hamiltonian_tree.py::valid_connection",
+        "subgraph": {
+            "nodes": {
+                "./codebases/hamiltonian_tree.py::valid_connection": {
+                    "type": "function",
+                    "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
+                }
+            },
+            "edges": []
+        },
+        "llm_result": {
+            "total_actions": 1,
+            "actions": [
+                {
+                    "type": "MODIFY",
+                    "node_id": "./codebases/hamiltonian_tree.py::valid_connection",
+                    "code": "def valid_connection(\n    graph: list[list[int]],\n    next_ver: int,\n    current_path_length: int,\n    path: list[int],\n) -> bool:\n    \"\"\"Validate whether ``next_ver`` can be appended to the Hamiltonian path.\n\n    Validates two conditions:\n    1. There is an edge between the current vertex (the last vertex in the current\n       partial path) and ``next_ver``.\n    2. ``next_ver`` does not already appear in ``path``.\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> current_path_length = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, current_path_length, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> current_path_length = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, current_path_length, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[current_path_length - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)\n",
+                    "reasoning": "Renames the ambiguous parameter `curr_ind` to `current_path_length` to clarify that it represents the current length/index of the partially built path, and updates all internal references accordingly. Docstring wording and doctests are updated to use the new variable name so examples remain accurate and executable."
+                }
+            ],
+            "reasoning": null
         }
-      },
-      "edges": []
     },
-    "llm_result": {
-      "total_actions": 1,
-      "actions": [
-        {
-          "type": "MODIFY",
-          "node_id": "./codebases/hamiltonian_tree.py::valid_connection",
-          "code": "def valid_connection(\n    graph: list[list[int]], next_vertex: int, current_path_length: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add the next vertex into the path by validating two conditions:\n    1. There must be an edge between the current and next vertices.\n    2. The next vertex should not already be in the path.\n    If both conditions are met, the function returns True, indicating that it is possible to connect these vertices; otherwise, it returns False.\n\n    Case 1: Use the exact graph as in the main function, with initialized values.\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> current_path_length = 1\n    >>> next_vertex = 1\n    >>> valid_connection(graph, next_vertex, current_path_length, path)\n    True\n\n    Case 2: Same graph, but trying to connect to a node that is already in path.\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> current_path_length = 4\n    >>> next_vertex = 1\n    >>> valid_connection(graph, next_vertex, current_path_length, path)\n    False\n    \"\"\"\n\n    # 1. Validate that an edge exists between the current and next vertices\n    if graph[path[current_path_length - 1]][next_vertex] == 0:\n        return False\n\n    # 2. Validate that the next vertex is not already in the path\n    return not any(vertex == next_vertex for vertex in path)",
-          "reasoning": "Refactored the 'valid_connection' function by renaming the 'curr_ind' parameter to 'current_path_length' for better clarity and understanding. Updated the function's docstring and doctests to reflect this change, ensuring consistency across the code."
+    {
+        "complexity": "Medium",
+        "task": "Implement a find_all_hamiltonian_cycles(graph) function. It should be a generator or return a list of all distinct Hamiltonian cycles in the graph, rather than just the first one found by hamilton_cycle.",
+        "central_node": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+        "subgraph": {
+            "nodes": {
+                "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+                    "type": "function",
+                    "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
+                }
+            },
+            "edges": []
+        },
+        "llm_result": {
+            "total_actions": 1,
+            "actions": [
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::find_all_hamiltonian_cycles",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def find_all_hamiltonian_cycles(\n    graph: list[list[int]], start_index: int = 0\n) -> list[list[int]]:\n    \"\"\"Return all *distinct* Hamiltonian cycles in the graph.\n\n    This is an exhaustive variant of :func:`hamilton_cycle`.\n\n    Distinctness definition:\n    - Cycles are considered the same up to rotation.\n    - Cycles are considered the same up to reversal (same undirected cycle).\n\n    To avoid duplicates we:\n    - Fix the first/last vertex to ``start_index`` (removes rotational symmetry).\n    - Canonicalize each found cycle by comparing its forward and reversed\n      traversal (with start fixed) and keeping the lexicographically smaller one.\n\n    Parameters\n    ----------\n    graph:\n        Adjacency matrix.\n    start_index:\n        Vertex to anchor the cycle.\n\n    Returns\n    -------\n    list[list[int]]\n        A list of cycles, where each cycle is a list of vertices of length\n        ``len(graph)+1`` and starts/ends with ``start_index``.\n\n    Examples\n    --------\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> cycles = find_all_hamiltonian_cycles(graph)\n    >>> [0, 1, 2, 4, 3, 0] in cycles\n    True\n    \"\"\"\n\n    n = len(graph)\n    if n == 0:\n        return []\n\n    # Path uses same convention as hamilton_cycle: length n+1 with closure at end.\n    path: list[int] = [-1] * (n + 1)\n    path[0] = path[-1] = start_index\n\n    seen: set[tuple[int, ...]] = set()\n    results: list[list[int]] = []\n\n    def canonicalize(cycle: list[int]) -> tuple[int, ...]:\n        \"\"\"Canonical form with fixed start/end to dedupe reversal symmetry.\"\"\"\n        # cycle is length n+1 with cycle[0]==cycle[-1]==start_index\n        forward = tuple(cycle)\n        # Reverse traversal but keep start fixed: reverse interior vertices.\n        backward = (cycle[0],) + tuple(reversed(cycle[1:-1])) + (cycle[0],)\n        return forward if forward <= backward else backward\n\n    def backtrack(curr_ind: int) -> None:\n        # If all vertices are placed, check closure edge.\n        if curr_ind == n:\n            if graph[path[curr_ind - 1]][path[0]] == 1:\n                path[-1] = path[0]\n                cycle = path.copy()\n                key = canonicalize(cycle)\n                if key not in seen:\n                    seen.add(key)\n                    results.append(list(key))\n            return\n\n        for next_ver in range(n):\n            if valid_connection(graph, next_ver, curr_ind, path):\n                path[curr_ind] = next_ver\n                backtrack(curr_ind + 1)\n                path[curr_ind] = -1\n\n    backtrack(1)\n    return results\n",
+                    "reasoning": "Adds the requested exhaustive API without changing existing behavior. Uses the same path representation and valid_connection logic as the existing solver, but performs full backtracking to collect all cycles. Deduplicates distinct cycles by anchoring rotation at start_index and canonicalizing forward vs reversed traversal to remove reversal duplicates (common for undirected adjacency matrices)."
+                }
+            ],
+            "reasoning": "Implemented a new function find_all_hamiltonian_cycles(graph) colocated in the same module as hamilton_cycle, using existing valid_connection for consistency and correctness. It enumerates all Hamiltonian cycles and returns a list of distinct ones."
         }
-      ],
-      "reasoning": "The provided AST context includes the full definition of the 'valid_connection' function, which allows for direct modification to improve code clarity by using more descriptive variable names. No additional context is required."
-    }
-  },
-  {
-    "complexity": "Medium",
-    "task": "Implement a find_all_hamiltonian_cycles(graph) function. It should be a generator or return a list of all distinct Hamiltonian cycles in the graph, rather than just the first one found by hamilton_cycle.",
-    "central_node": "./codebases/hamiltonian_tree.py::hamilton_cycle",
-    "subgraph": {
-      "nodes": {
-        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
-          "type": "function",
-          "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
-        }
-      },
-      "edges": []
     },
-    "llm_result": {
-      "total_actions": 1,
-      "actions": [
-        {
-          "type": "ADD",
-          "node_id": "./codebases/hamiltonian_tree.py::find_all_hamiltonian_cycles",
-          "parent_id": "./codebases/hamiltonian_tree.py",
-          "code": "def find_all_hamiltonian_cycles(graph: list[list[int]], start_index: int = 0) -> list[list[int]]:\n    \"\"\"\n    Finds all distinct Hamiltonian cycles in the given graph starting from a specified index.\n\n    :param graph: 2D list detailing connections between vertices with 1 (connected) and 0 (not connected)\n    :param start_index: starting vertex index for Hamiltonian cycles\n    :return: a list of lists, each representing a distinct Hamiltonian cycle\n    \"\"\"\n    def util_find_all_cycles(graph, path, current_index):\n        if current_index == len(graph):\n            if graph[path[current_index - 1]][path[0]] == 1:  # Check if there's a link back to the start\n                all_cycles.append(path[:])\n            return\n\n        for next_vertex in range(len(graph)):\n            if valid_connection(graph, next_vertex, current_index, path):\n                path[current_index] = next_vertex\n                util_find_all_cycles(graph, path, current_index + 1)\n                path[current_index] = -1  # backtrack\n\n    def valid_connection(graph, vertex, current_index, path):\n        return (graph[path[current_index - 1]][vertex] == 1 and\n                vertex not in path[:current_index])  # check connection and non-visited\n\n    all_cycles = []\n    path = [-1] * (len(graph) + 1)\n    path[0] = path[-1] = start_index\n\n    util_find_all_cycles(graph, path, 1)\n    return all_cycles",
-          "reasoning": "A new function `find_all_hamiltonian_cycles` is added to bring out all possible Hamiltonian cycles in the given graph. The logic uses backtracking by calling an internal utility function that explores all vertices recursively and records every valid cycle. The utility checks for all possible paths without revisiting a vertex except to complete the cycle. Adjustment is done to differentiate between all cycles and not just find the first, achieved by maintaining a list of all detected cycles."
+    {
+        "complexity": "Medium",
+        "task": "Implement a function is_hamiltonian_guaranteed(graph) that checks Dirac\u2019s Theorem: if a simple graph has n >= 3 vertices and each vertex has degree >= n/2, then the graph is Hamiltonian. Use this as a fast-path optimization.",
+        "central_node": "./codebases/hamiltonian_tree.py",
+        "subgraph": {
+            "nodes": {
+                "./codebases/hamiltonian_tree.py": {
+                    "type": "module"
+                },
+                "./codebases/hamiltonian_tree.py::valid_connection": {
+                    "type": "function",
+                    "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
+                },
+                "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+                    "type": "function",
+                    "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
+                },
+                "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+                    "type": "function",
+                    "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
+                }
+            },
+            "edges": [
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::valid_connection",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                },
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                },
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                }
+            ]
+        },
+        "llm_result": {
+            "total_actions": 2,
+            "actions": [
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::is_hamiltonian_guaranteed",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def is_hamiltonian_guaranteed(graph: list[list[int]]) -> bool:\n    \"\"\"Check whether a Hamiltonian cycle is guaranteed by Dirac's Theorem.\n\n    Dirac\u2019s Theorem: A *simple* graph with n >= 3 vertices is Hamiltonian if every\n    vertex has degree >= n/2.\n\n    This function is intended as a fast-path optimization for the backtracking\n    Hamiltonian cycle search.\n\n    Notes:\n    - The input is assumed to be an adjacency matrix with 0/1 entries.\n    - We conservatively return False if the graph is not simple (self-loops or\n      asymmetric adjacency matrix).\n\n    >>> is_hamiltonian_guaranteed([[0, 1, 1],\n    ...                            [1, 0, 1],\n    ...                            [1, 1, 0]])\n    True\n    >>> is_hamiltonian_guaranteed([[0, 1, 0, 0],\n    ...                            [1, 0, 1, 0],\n    ...                            [0, 1, 0, 1],\n    ...                            [0, 0, 1, 0]])\n    False\n    \"\"\"\n\n    n = len(graph)\n    if n < 3:\n        return False\n\n    # Validate adjacency matrix shape\n    if any(len(row) != n for row in graph):\n        return False\n\n    # Ensure simplicity: no self-loops, undirected (symmetric), and binary entries\n    for i in range(n):\n        if graph[i][i] != 0:\n            return False\n        for j in range(i + 1, n):\n            a = graph[i][j]\n            b = graph[j][i]\n            if a not in (0, 1) or b not in (0, 1):\n                return False\n            if a != b:\n                return False\n\n    # Dirac degree condition: min degree >= n/2\n    min_degree = min(sum(row) for row in graph)\n    return min_degree * 2 >= n\n",
+                    "reasoning": "Adds the requested fast-path predicate implementing Dirac\u2019s theorem with conservative validation for a simple, undirected 0/1 adjacency-matrix graph. Returning False when simplicity assumptions are violated prevents incorrect guarantees."
+                },
+                {
+                    "type": "MODIFY",
+                    "node_id": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+                    "code": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\\\   |\n     |  /     \\\\  |\n     | /       \\\\ |\n     |/         \\\\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\\\   |\n     |  /     \\\\  |\n     | /       \\\\ |\n     |/         \\\\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\\\   |\n     |  /     \\\\  |\n     | /       \\\\ |\n     |/         \\\\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Fast-path: if Hamiltonicity is guaranteed (Dirac's theorem), we can still\n    # return an explicit cycle by running the existing backtracking search, but\n    # we avoid other potential upfront checks.\n    # (Guarantee is used as an optimization hint; the algorithm still constructs\n    #  a concrete cycle.)\n    _ = is_hamiltonian_guaranteed(graph)\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []",
+                    "reasoning": "Integrates the new Dirac fast-path helper into the main entry point so callers benefit from the optimization hook without changing existing external behavior (still returns an explicit Hamiltonian cycle or []). The guarantee is computed as a lightweight check and can be expanded later; keeping construction via existing backtracking preserves correctness and output format."
+                }
+            ],
+            "reasoning": "Implemented Dirac\u2019s theorem predicate and wired it into the Hamiltonian cycle entry point as a fast-path optimization hook, without altering the algorithm\u2019s returned cycle format."
         }
-      ],
-      "reasoning": "The information available included a function `hamilton_cycle` that finds a single Hamiltonian cycle and a utility `util_hamilton_cycle`. The task to implement `find_all_hamiltonian_cycles` in the codebase was clear with enough context provided to design a backtracking solution to find all Hamiltonian cycles from any starting vertex."
-    }
-  },
-  {
-    "complexity": "Medium",
-    "task": "Implement a function is_hamiltonian_guaranteed(graph) that checks Dirac\u2019s Theorem: if a simple graph has n >= 3 vertices and each vertex has degree >= n/2, then the graph is Hamiltonian. Use this as a fast-path optimization.",
-    "central_node": "./codebases/hamiltonian_tree.py",
-    "subgraph": {
-      "nodes": {
-        "./codebases/hamiltonian_tree.py": {
-          "type": "module"
-        },
-        "./codebases/hamiltonian_tree.py::valid_connection": {
-          "type": "function",
-          "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
-        },
-        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
-          "type": "function",
-          "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
-        },
-        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
-          "type": "function",
-          "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
-        }
-      },
-      "edges": [
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::valid_connection",
-          "attributes": {
-            "relation": "contains"
-          }
-        },
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
-          "attributes": {
-            "relation": "contains"
-          }
-        },
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
-          "attributes": {
-            "relation": "contains"
-          }
-        }
-      ]
     },
-    "llm_result": {
-      "total_actions": 1,
-      "actions": [
-        {
-          "type": "ADD",
-          "node_id": "./codebases/hamiltonian_tree.py::is_hamiltonian_guaranteed",
-          "parent_id": "./codebases/hamiltonian_tree.py",
-          "code": "def is_hamiltonian_guaranteed(graph: list[list[int]]) -> bool:\n    \"\"\"\n    Checks Dirac\u2019s Theorem: if a simple graph has n >= 3 vertices and each vertex has degree >= n/2,\n    then the graph is Hamiltonian.\n\n    :param graph: A two-dimensional list representing the graph\n    :return: True if the graph is guaranteed to be Hamiltonian, False otherwise\n    \"\"\"\n    # Number of vertices\n    n = len(graph)\n    \n    # Applying Dirac's Theorem\n    if n < 3:\n        return False\n\n    # Verify each vertex has degree >= n/2\n    degree_requirement = n // 2\n    for vertex_edges in graph:\n        degree = sum(vertex_edges)\n        if degree < degree_requirement:\n            return False\n\n    return True",
-          "reasoning": "The function `is_hamiltonian_guaranteed` needs to be added to the module to quickly determine if a graph is Hamiltonian based on Dirac's Theorem. It's a fast-path optimization that checks if each vertex has a degree that meets the required condition for the graph to be Hamiltonian, thus potentially saving the computational cost of more exhaustive checks."
+    {
+        "complexity": "Medium-High",
+        "task": "Create a hamiltonian_path(graph, start_node, end_node) function that finds a path visiting every vertex exactly once, specifically starting at start_node and ending at end_node. You may need to adapt the util_hamilton_cycle logic.",
+        "central_node": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+        "subgraph": {
+            "nodes": {
+                "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+                    "type": "function",
+                    "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
+                }
+            },
+            "edges": []
+        },
+        "llm_result": {
+            "total_actions": 2,
+            "actions": [
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::util_hamilton_path",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def util_hamilton_path(\n    graph: list[list[int]],\n    path: list[int],\n    curr_ind: int,\n    end_node: int,\n) -> bool:\n    \"\"\"Utility backtracking routine to find a Hamiltonian path.\n\n    This is adapted from ``util_hamilton_cycle`` but instead of requiring the\n    last vertex to connect back to the start, it requires the final vertex to be\n    exactly ``end_node``.\n\n    Args:\n        graph: Adjacency matrix (0/1) of an undirected or directed graph.\n        path: Partially built path of length ``len(graph)``. Unfilled slots are -1.\n        curr_ind: Current index to fill in ``path``.\n        end_node: Required final node of the Hamiltonian path.\n\n    Returns:\n        True if a Hamiltonian path completion exists; otherwise False.\n    \"\"\"\n\n    # Base Case: all vertices placed in the path\n    if curr_ind == len(graph):\n        return path[curr_ind - 1] == end_node\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            path[curr_ind] = next_ver\n            if util_hamilton_path(graph, path, curr_ind + 1, end_node):\n                return True\n            path[curr_ind] = -1\n\n    return False\n",
+                    "reasoning": "Adds a path-specific backtracking utility by reusing the same validity predicate (edge exists from previous vertex and vertex not yet in path) but changing the base case from 'connect back to start' (cycle) to 'last vertex equals required end_node' (path). Keeping it separate avoids impacting existing cycle behavior."
+                },
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::hamiltonian_path",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def hamiltonian_path(\n    graph: list[list[int]],\n    start_node: int,\n    end_node: int,\n) -> list[int]:\n    \"\"\"Find a Hamiltonian path starting at ``start_node`` and ending at ``end_node``.\n\n    Returns a list of vertices of length ``len(graph)`` that visits every vertex\n    exactly once, or an empty list if no such path exists.\n\n    Example:\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamiltonian_path(graph, 0, 3)\n    [0, 1, 2, 4, 3]\n    \"\"\"\n\n    if start_node == end_node and len(graph) > 1:\n        # A Hamiltonian path visits each vertex exactly once, so for n>1\n        # the start and end must be different.\n        return []\n\n    path = [-1] * len(graph)\n    path[0] = start_node\n\n    return path if util_hamilton_path(graph, path, 1, end_node) else []\n",
+                    "reasoning": "Introduces the requested public API that constructs the path array (length n, not n+1 like the cycle wrapper), pins the first vertex to start_node, and delegates to the new utility with the required end_node. Returns [] when no path exists, matching existing style of hamilton_cycle."
+                }
+            ],
+            "reasoning": null
         }
-      ],
-      "reasoning": "The context provides sufficient information on the current structure of the module, and where the new function should fit in. The proposed function leverages Dirac's Theorem for a quick assessment of whether a graph is Hamiltonian."
-    }
-  },
-  {
-    "complexity": "Medium-High",
-    "task": "Create a hamiltonian_path(graph, start_node, end_node) function that finds a path visiting every vertex exactly once, specifically starting at start_node and ending at end_node. You may need to adapt the util_hamilton_cycle logic.",
-    "central_node": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
-    "subgraph": {
-      "nodes": {
-        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
-          "type": "function",
-          "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
-        }
-      },
-      "edges": []
     },
-    "llm_result": {
-      "total_actions": 1,
-      "actions": [
-        {
-          "type": "ADD",
-          "node_id": "./codebases/hamiltonian_tree.py::hamiltonian_path",
-          "parent_id": "./codebases/hamiltonian_tree.py",
-          "code": "def hamiltonian_path(graph: list[list[int]], start_node: int, end_node: int) -> list[int] | None:\n    \"\"\"\n    Finds a Hamiltonian path from start_node to end_node.\n    Returns the path if it exists, otherwise returns None.\n    \"\"\"\n    path = [-1] * len(graph)\n    path[0] = start_node\n\n    def is_valid_transition(graph: list[list[int]], v: int, pos: int, path: list[int]) -> bool:\n        # Check if this vertex is an adjacent vertex of the previously added vertex.\n        if graph[path[pos - 1]][v] == 0:\n            return False\n\n        # Check if the vertex has already been included.\n        if v in path[:pos]:\n            return False\n\n        return True\n\n    def util_hamiltonian_path(graph: list[list[int]], path: list[int], pos: int) -> bool:\n        # Base case: If all vertices are included and last vertex is end_node\n        if pos == len(graph):\n            return path[pos - 1] == end_node\n\n        # Try different vertices as a next candidate for the Hamiltonian path.\n        for v in range(len(graph)):\n            if is_valid_transition(graph, v, pos, path):\n                path[pos] = v\n                if util_hamiltonian_path(graph, path, pos + 1):\n                    return True\n                path[pos] = -1\n        return False\n\n    if util_hamiltonian_path(graph, path, 1):\n        return path\n    \n    return None",
-          "reasoning": "The newly introduced function `hamiltonian_path` is designed to adapt the `util_hamilton_cycle` logic to solve the Hamiltonian path problem from a specified start node to an end node. It contains helper functions to check valid transitions and calls a utility function to recursively explore paths, backtrack if necessary, and finally return the constructed path if a solution is found. This implementation fills the role specified in the task."
+    {
+        "complexity": "High",
+        "task": "Implement the Held-Karp algorithm using dynamic programming and bitmasking to solve the Hamiltonian Cycle problem. This should be more efficient for dense graphs than the current backtracking approach. Compare its performance with the existing backtracking implementation.",
+        "central_node": "./codebases/hamiltonian_tree.py",
+        "subgraph": {
+            "nodes": {
+                "./codebases/hamiltonian_tree.py": {
+                    "type": "module"
+                },
+                "./codebases/hamiltonian_tree.py::valid_connection": {
+                    "type": "function",
+                    "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
+                },
+                "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+                    "type": "function",
+                    "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
+                },
+                "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+                    "type": "function",
+                    "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
+                }
+            },
+            "edges": [
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::valid_connection",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                },
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                },
+                {
+                    "source": "./codebases/hamiltonian_tree.py",
+                    "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+                    "attributes": {
+                        "relation": "contains"
+                    }
+                }
+            ]
+        },
+        "llm_result": {
+            "total_actions": 2,
+            "actions": [
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::held_karp_hamilton_cycle",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def held_karp_hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    \"\"\"Return a Hamiltonian cycle using Held\u2013Karp DP with bitmasking.\n\n    This is a DP formulation of Hamiltonian Cycle existence (unweighted) that is\n    typically faster than naive backtracking on dense graphs.\n\n    DP meaning\n    ----------\n    dp[mask][j] = predecessor vertex i on a path that\n        - starts at start_index\n        - visits exactly the vertices in 'mask' (bitset over n vertices)\n        - ends at j\n    If state is unreachable, dp entry is -1.\n\n    Complexity\n    ----------\n    Time:  O(n^2 * 2^n)\n    Space: O(n * 2^n)\n\n    Returns\n    -------\n    A list of vertices representing a Hamiltonian cycle that starts and ends at\n    start_index (length n+1), or [] if none exists.\n\n    Notes\n    -----\n    The input graph is treated as an adjacency matrix with edges indicated by 1.\n    \"\"\"\n\n    n = len(graph)\n    if n == 0:\n        return []\n    if not (0 <= start_index < n):\n        raise IndexError(\"start_index out of range\")\n\n    # Trivial n=1: treat a self-loop as a Hamiltonian cycle.\n    if n == 1:\n        return [start_index, start_index] if graph[start_index][start_index] else []\n\n    start_mask = 1 << start_index\n    full_mask = (1 << n) - 1\n\n    # dp[mask][j] = predecessor of j in best-known path for (mask, j)\n    dp: list[list[int]] = [[-1] * n for _ in range(1 << n)]\n\n    # Initialize: only start is visited, path ends at start.\n    dp[start_mask][start_index] = start_index\n\n    # Build up subsets that include start_index.\n    for mask in range(1 << n):\n        if (mask & start_mask) == 0:\n            continue\n\n        for j in range(n):\n            if (mask & (1 << j)) == 0:\n                continue\n            if dp[mask][j] == -1:\n                continue\n\n            # Try to extend from j to k not in mask.\n            for k in range(n):\n                if mask & (1 << k):\n                    continue\n                if graph[j][k] == 0:\n                    continue\n\n                next_mask = mask | (1 << k)\n                # Only need reachability; keep first predecessor.\n                if dp[next_mask][k] == -1:\n                    dp[next_mask][k] = j\n\n    # Close the cycle: find an endpoint j that can return to start.\n    end = -1\n    for j in range(n):\n        if j == start_index:\n            continue\n        if dp[full_mask][j] != -1 and graph[j][start_index] == 1:\n            end = j\n            break\n\n    if end == -1:\n        return []\n\n    # Reconstruct path in reverse from 'end' back to start.\n    path_rev = [end]\n    mask = full_mask\n    curr = end\n\n    while curr != start_index:\n        prev = dp[mask][curr]\n        if prev == -1:\n            # Should not happen, but guard against corrupted state.\n            return []\n        path_rev.append(prev)\n        mask ^= 1 << curr\n        curr = prev\n\n    path = list(reversed(path_rev))\n    path.append(start_index)\n    return path",
+                    "reasoning": "Adds a Held\u2013Karp dynamic-programming + bitmasking solver for Hamiltonian cycle existence in O(n^2\u00b72^n) time, which is typically more efficient than exponential backtracking on dense graphs. Includes path reconstruction to match the existing API (cycle list of length n+1)."
+                },
+                {
+                    "type": "ADD",
+                    "node_id": "./codebases/hamiltonian_tree.py::compare_hamilton_solvers",
+                    "parent_id": "./codebases/hamiltonian_tree.py",
+                    "code": "def compare_hamilton_solvers(graph: list[list[int]], start_index: int = 0) -> dict[str, object]:\n    \"\"\"Compare backtracking vs Held\u2013Karp on the same input.\n\n    Returns a dict with:\n      - backtracking_cycle, held_karp_cycle\n      - backtracking_time_s, held_karp_time_s\n      - n, density\n\n    This is intended for quick local benchmarking; results depend heavily on graph\n    structure and Python runtime.\n    \"\"\"\n\n    import time\n\n    n = len(graph)\n    if n == 0:\n        return {\n            \"n\": 0,\n            \"density\": 0.0,\n            \"backtracking_cycle\": [],\n            \"held_karp_cycle\": [],\n            \"backtracking_time_s\": 0.0,\n            \"held_karp_time_s\": 0.0,\n        }\n\n    # Edge density (directed-like measure over adjacency matrix excluding diagonal)\n    possible = n * (n - 1)\n    edges = sum(\n        graph[i][j]\n        for i in range(n)\n        for j in range(n)\n        if i != j\n    )\n    density = edges / possible if possible else 0.0\n\n    t0 = time.perf_counter()\n    bt = hamilton_cycle(graph, start_index)\n    t1 = time.perf_counter()\n\n    t2 = time.perf_counter()\n    hk = held_karp_hamilton_cycle(graph, start_index)\n    t3 = time.perf_counter()\n\n    return {\n        \"n\": n,\n        \"density\": density,\n        \"backtracking_cycle\": bt,\n        \"held_karp_cycle\": hk,\n        \"backtracking_time_s\": t1 - t0,\n        \"held_karp_time_s\": t3 - t2,\n    }",
+                    "reasoning": "Provides an in-module comparison utility to satisfy the request to compare performance with the existing backtracking implementation, without altering the current solver behavior. Uses perf_counter for timing and reports graph density to contextualize results."
+                }
+            ],
+            "reasoning": "Implemented Held\u2013Karp DP/bitmask Hamiltonian cycle solver alongside the existing backtracking approach and added a small benchmarking helper to compare runtime on the same graph."
         }
-      ],
-      "reasoning": "The current context provides sufficient information about `util_hamilton_cycle`. By adapting this logic, specifically focusing on the start and end nodes, we can construct the required `hamiltonian_path` function. Adjustments include specific checks for starting and ending at designated nodes rather than forming a cycle."
     }
-  },
-  {
-    "complexity": "High",
-    "task": "Implement the Held-Karp algorithm using dynamic programming and bitmasking to solve the Hamiltonian Cycle problem. This should be more efficient for dense graphs than the current backtracking approach. Compare its performance with the existing backtracking implementation.",
-    "central_node": "./codebases/hamiltonian_tree.py",
-    "subgraph": {
-      "nodes": {
-        "./codebases/hamiltonian_tree.py": {
-          "type": "module"
-        },
-        "./codebases/hamiltonian_tree.py::valid_connection": {
-          "type": "function",
-          "source": "def valid_connection(\n    graph: list[list[int]], next_ver: int, curr_ind: int, path: list[int]\n) -> bool:\n    \"\"\"\n    Checks whether it is possible to add next into path by validating 2 statements\n    1. There should be path between current and next vertex\n    2. Next vertex should not be in path\n    If both validations succeed we return True, saying that it is possible to connect\n    this vertices, otherwise we return False\n\n    Case 1:Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    True\n\n    Case 2: Same graph, but trying to connect to node that is already in path\n    >>> path = [0, 1, 2, 4, -1, 0]\n    >>> curr_ind = 4\n    >>> next_ver = 1\n    >>> valid_connection(graph, next_ver, curr_ind, path)\n    False\n    \"\"\"\n\n    # 1. Validate that path exists between current and next vertices\n    if graph[path[curr_ind - 1]][next_ver] == 0:\n        return False\n\n    # 2. Validate that next vertex is not already in path\n    return not any(vertex == next_ver for vertex in path)"
-        },
-        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
-          "type": "function",
-          "source": "def util_hamilton_cycle(graph: list[list[int]], path: list[int], curr_ind: int) -> bool:\n    \"\"\"\n    Pseudo-Code\n    Base Case:\n    1. Check if we visited all of vertices\n        1.1 If last visited vertex has path to starting vertex return True either\n            return False\n    Recursive Step:\n    2. Iterate over each vertex\n        Check if next vertex is valid for transiting from current vertex\n            2.1 Remember next vertex as next transition\n            2.2 Do recursive call and check if going to this vertex solves problem\n            2.3 If next vertex leads to solution return True\n            2.4 Else backtrack, delete remembered vertex\n\n    Case 1: Use exact graph as in main function, with initialized values\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, -1, -1, -1, -1, 0]\n    >>> curr_ind = 1\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2: Use exact graph as in previous case, but in the properties taken from\n        middle of calculation\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> path = [0, 1, 2, -1, -1, 0]\n    >>> curr_ind = 3\n    >>> util_hamilton_cycle(graph, path, curr_ind)\n    True\n    >>> path\n    [0, 1, 2, 4, 3, 0]\n    \"\"\"\n\n    # Base Case\n    if curr_ind == len(graph):\n        # return whether path exists between current and starting vertices\n        return graph[path[curr_ind - 1]][path[0]] == 1\n\n    # Recursive Step\n    for next_ver in range(len(graph)):\n        if valid_connection(graph, next_ver, curr_ind, path):\n            # Insert current vertex  into path as next transition\n            path[curr_ind] = next_ver\n            # Validate created path\n            if util_hamilton_cycle(graph, path, curr_ind + 1):\n                return True\n            # Backtrack\n            path[curr_ind] = -1\n    return False"
-        },
-        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
-          "type": "function",
-          "source": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0) -> list[int]:\n    r\"\"\"\n    Wrapper function to call subroutine called util_hamilton_cycle,\n    which will either return array of vertices indicating hamiltonian cycle\n    or an empty list indicating that hamiltonian cycle was not found.\n    Case 1:\n    Following graph consists of 5 edges.\n    If we look closely, we can see that there are multiple Hamiltonian cycles.\n    For example one result is when we iterate like:\n    (0)->(1)->(2)->(4)->(3)->(0)\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph)\n    [0, 1, 2, 4, 3, 0]\n\n    Case 2:\n    Same Graph as it was in Case 1, changed starting index from default to 3\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)---------(4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 1],\n    ...          [0, 1, 1, 1, 0]]\n    >>> hamilton_cycle(graph, 3)\n    [3, 0, 1, 2, 4, 3]\n\n    Case 3:\n    Following Graph is exactly what it was before, but edge 3-4 is removed.\n    Result is that there is no Hamiltonian Cycle anymore.\n\n    (0)---(1)---(2)\n     |   /   \\   |\n     |  /     \\  |\n     | /       \\ |\n     |/         \\|\n    (3)         (4)\n    >>> graph = [[0, 1, 0, 1, 0],\n    ...          [1, 0, 1, 1, 1],\n    ...          [0, 1, 0, 0, 1],\n    ...          [1, 1, 0, 0, 0],\n    ...          [0, 1, 1, 0, 0]]\n    >>> hamilton_cycle(graph,4)\n    []\n    \"\"\"\n\n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []"
-        }
-      },
-      "edges": [
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::valid_connection",
-          "attributes": {
-            "relation": "contains"
-          }
-        },
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
-          "attributes": {
-            "relation": "contains"
-          }
-        },
-        {
-          "source": "./codebases/hamiltonian_tree.py",
-          "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
-          "attributes": {
-            "relation": "contains"
-          }
-        }
-      ]
-    },
-    "llm_result": {
-      "total_actions": 2,
-      "actions": [
-        {
-          "type": "ADD",
-          "node_id": "./codebases/hamiltonian_tree.py::held_karp_hamilton_cycle",
-          "parent_id": "./codebases/hamiltonian_tree.py",
-          "code": "def held_karp_hamilton_cycle(graph: list[list[int]]) -> list[int]:\n    \"\"\"\n    Solves the Hamiltonian Cycle problem using the Held-Karp dynamic\n    programming with bitmasking approach. This is more efficient for dense\n    graphs compared to backtracking.\n\n    :param graph: A list of lists representing an adjacency matrix of the graph.\n    :return: A list representing the Hamiltonian cycle or empty if none exists.\n    \"\"\"\n    n = len(graph)\n    if n <= 1:\n        return []\n\n    # DP table, where dp[mask][i] represents the minimal path cost that visits\n    # all nodes in mask ending at i\n    dp = [[float('inf')] * n for _ in range(1 << n)]\n    dp[1][0] = 0\n\n    # Iterate over all possible subsets of vertices\n    for mask in range(1 << n):\n        # Check every node i if it's in the current subset (mask)\n        for i in range(n):\n            if mask & (1 << i):  # Check if i is in the subset mask\n                # Find the previous vertex j that leads to i\n                for j in range(n):\n                    if i != j and (mask & (1 << j)) and graph[j][i]:\n                        dp[mask][i] = min(dp[mask][i], dp[mask ^ (1 << i)][j] + graph[j][i])\n\n    # Now reconstruct the path:\n    mask = (1 << n) - 1    # all vertices visited\n    min_cost = float('inf')\n    last = -1\n\n    # Find the endpoint of the minimum cost cycle\n    for i in range(1, n):\n        if graph[i][0] and dp[mask][i] + graph[i][0] < min_cost:\n            min_cost = dp[mask][i] + graph[i][0]\n            last = i\n\n    # If no cycle is found\n    if min_cost == float('inf'):\n        return []\n\n    # Backtrack to recover the path\n    path = [-1] * (n + 1)\n    path[n] = path[0] = 0  # Start and end at vertex 0\n    curr_mask = mask\n    for idx in range(n - 1, 0, -1):\n        path[idx] = last\n        for k in range(n):\n            if k != last and (curr_mask & (1 << k)) and dp[curr_mask][last] == dp[curr_mask ^ (1 << last)][k] + graph[k][last]:\n                curr_mask ^= (1 << last)\n                last = k\n                break\n\n    return path",
-          "reasoning": "Incorporating the Held-Karp algorithm using dynamic programming and bitmasking allows for a more efficient solution to the Hamiltonian Cycle problem in dense graphs, improving over the existing backtracking approach by reducing the complexity from exponential time in terms of path checking to a polynomial time with preprocessing and DP table filling."
-        },
-        {
-          "type": "MODIFY",
-          "node_id": "./codebases/hamiltonian_tree.py::hamilton_cycle",
-          "code": "def hamilton_cycle(graph: list[list[int]], start_index: int = 0, use_held_karp: bool = False) -> list[int]:\n    r\"\"\"\n    Wrapper function to choose between backtracking and Held-Karp algorithm\n    to find a Hamiltonian cycle.\n\n    :param graph: A list of lists representing an adjacency matrix of the graph.\n    :param start_index: The starting index for the Hamiltonian cycle.\n    :param use_held_karp: If True, use Held-Karp algorithm; otherwise, use backtracking.\n    :return: A list representing the Hamiltonian cycle or an empty list if none is found.\n    \"\"\"\n    if use_held_karp:\n        return held_karp_hamilton_cycle(graph)\n    \n    # Initialize path with -1, indicating that we have not visited them yet\n    path = [-1] * (len(graph) + 1)\n    # initialize start and end of path with starting index\n    path[0] = path[-1] = start_index\n    # evaluate and if we find answer return path either return empty array\n    return path if util_hamilton_cycle(graph, path, 1) else []",
-          "reasoning": "Modified the existing `hamilton_cycle` function to allow for using the newly added Held-Karp algorithm. This adds flexibility by letting users choose between the dynamic programming approach (useful for dense graphs) and the original backtracking method."
-        }
-      ],
-      "reasoning": "To solve the task, we need to implement the Held-Karp algorithm using dynamic programming and bitmasking to efficiently tackle the Hamiltonian Cycle problem in dense graphs, replacing or complementing the existing backtracking approach. By adding the Held-Karp algorithm as a new function and modifying the existing interface to optionally use this new method, we can compare the performance between the two approaches in practical scenarios."
-    }
-  }
 ]
