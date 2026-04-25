@@ -1,0 +1,221 @@
+[
+  {
+    "complexity": "Low-Medium",
+    "prompt": "Please add a scale(self, factor: int) method to the FenwickTree class. This method should multiply every element in the tree by the given factor. Implement this efficiently in O(N) time. Include a docstring and a doctest.",
+    "central_node": "./codebases/fenwick_tree.py::FenwickTree",
+    "context_subgraph": {
+      "nodes": [
+        "./codebases/fenwick_tree.py::FenwickTree",
+        "./codebases/fenwick_tree.py::FenwickTree::__init__",
+        "./codebases/fenwick_tree.py::FenwickTree::init",
+        "./codebases/fenwick_tree.py::FenwickTree::get_array",
+        "./codebases/fenwick_tree.py::FenwickTree::next_",
+        "./codebases/fenwick_tree.py::FenwickTree::prev",
+        "./codebases/fenwick_tree.py::FenwickTree::add",
+        "./codebases/fenwick_tree.py::FenwickTree::update",
+        "./codebases/fenwick_tree.py::FenwickTree::prefix",
+        "./codebases/fenwick_tree.py::FenwickTree::query",
+        "./codebases/fenwick_tree.py::FenwickTree::get",
+        "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+      ],
+      "edges": [
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::__init__"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::init"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get_array"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::next_"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prev"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::add"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::update"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prefix"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::query"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+        ]
+      ]
+    }
+  },
+  {
+    "complexity": "Low",
+    "prompt": "Implement __getitem__(self, index) and __len__(self) in the FenwickTree class. __getitem__ should be a wrapper for the get method, and __len__ should return self.size. Add appropriate doctests to verify these work like a standard Python sequence.",
+    "central_node": "./codebases/fenwick_tree.py::FenwickTree",
+    "context_subgraph": {
+      "nodes": [
+        "./codebases/fenwick_tree.py::FenwickTree",
+        "./codebases/fenwick_tree.py::FenwickTree::__init__",
+        "./codebases/fenwick_tree.py::FenwickTree::init",
+        "./codebases/fenwick_tree.py::FenwickTree::get_array",
+        "./codebases/fenwick_tree.py::FenwickTree::next_",
+        "./codebases/fenwick_tree.py::FenwickTree::prev",
+        "./codebases/fenwick_tree.py::FenwickTree::add",
+        "./codebases/fenwick_tree.py::FenwickTree::update",
+        "./codebases/fenwick_tree.py::FenwickTree::prefix",
+        "./codebases/fenwick_tree.py::FenwickTree::query",
+        "./codebases/fenwick_tree.py::FenwickTree::get",
+        "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+      ],
+      "edges": [
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::__init__"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::init"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get_array"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::next_"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prev"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::add"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::update"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prefix"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::query"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+        ]
+      ]
+    }
+  },
+  {
+    "complexity": "Medium",
+    "prompt": "Implement a range_add(self, left: int, right: int, value: int) method. This should add value to all elements in the range [left, right). Note that for a standard Fenwick Tree, this is typically done by changing the semantics to Difference Array mode. Explain if this change affects the query or prefix methods and implement the most compatible version.",
+    "central_node": "./codebases/fenwick_tree.py::FenwickTree::add",
+    "context_subgraph": {
+      "nodes": ["./codebases/fenwick_tree.py::FenwickTree::add"],
+      "edges": []
+    }
+  },
+  {
+    "complexity": "Medium-High",
+    "prompt": "Implement a find_kth(self, k: int) method for the FenwickTree. Assuming the tree stores frequencies (non-negative integers), this method should return the smallest index i such that the prefix sum up to i is at least k. Use binary lifting to achieve O(log N) time complexity, similar to the logic in rank_query.",
+    "central_node": "./codebases/fenwick_tree.py::FenwickTree::rank_query",
+    "context_subgraph": {
+      "nodes": ["./codebases/fenwick_tree.py::FenwickTree::rank_query"],
+      "edges": []
+    }
+  },
+  {
+    "complexity": "High",
+    "prompt": "Create a new class FenwickTree2D that implements a 2D Fenwick Tree. It should support add(self, r, c, val) and query(self, r1, c1, r2, c2) methods, both operating in O(log R * log C) time. Use the existing 1D FenwickTree logic as a reference for how to handle the bit manipulation and indexing.",
+    "central_node": "./codebases/fenwick_tree.py::FenwickTree",
+    "context_subgraph": {
+      "nodes": [
+        "./codebases/fenwick_tree.py::FenwickTree",
+        "./codebases/fenwick_tree.py::FenwickTree::__init__",
+        "./codebases/fenwick_tree.py::FenwickTree::init",
+        "./codebases/fenwick_tree.py::FenwickTree::get_array",
+        "./codebases/fenwick_tree.py::FenwickTree::next_",
+        "./codebases/fenwick_tree.py::FenwickTree::prev",
+        "./codebases/fenwick_tree.py::FenwickTree::add",
+        "./codebases/fenwick_tree.py::FenwickTree::update",
+        "./codebases/fenwick_tree.py::FenwickTree::prefix",
+        "./codebases/fenwick_tree.py::FenwickTree::query",
+        "./codebases/fenwick_tree.py::FenwickTree::get",
+        "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+      ],
+      "edges": [
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::__init__"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::init"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get_array"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::next_"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prev"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::add"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::update"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::prefix"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::query"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::get"
+        ],
+        [
+          "./codebases/fenwick_tree.py::FenwickTree",
+          "./codebases/fenwick_tree.py::FenwickTree::rank_query"
+        ]
+      ]
+    }
+  }
+]

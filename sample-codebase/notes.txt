@@ -1,0 +1,41 @@
+With the current implementation, these are the entities captured:
+Nodes
+
+module — every .py file
+class — every class definition
+function — every function and async function definition (including methods inside classes)
+module (imported) — external modules from import x and from x import y
+
+Edges
+
+contains — module → class, module → function, class → method
+imports — module → imported module/symbol
+calls — function → function, but only for same-file calls where the callee name exactly matches a node already in the graph
+
+-----------------------------------------------------------------------------------
+
+LLM Inputs: 
+Subgraph
+Task
+
+LLM Outputs:
+
+-----------------------------------------------------------------------------------
+
+Single File:
+Fenwick Tree
+Hamiltonian Cycle
+Decision Tree
+
+Small Codebases:
+Flasky
+Neural-Networks-from-Scratch
+pyneatR
+
+
+Medium Codebases:
+Python Fire
+
+Large Codebases:
+
+Enterprise Codebases:

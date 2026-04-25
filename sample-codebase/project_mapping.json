@@ -1,0 +1,37 @@
+{
+  "hamiltonian_tree.py": {
+    "ast_graph": "AST\\hamiltonian_tree.py.pkl",
+    "image": "AST\\images\\hamiltonian_tree.py.png",
+    "queries": "queries\\hamiltonian_tree_query.json"
+  },
+  "decision_tree.py": {
+    "ast_graph": "AST\\decision_tree.py.pkl",
+    "image": "AST\\images\\decision_tree.py.png",
+    "queries": "queries\\decision_tree_query.json"
+  },
+  "fenwick_tree.py": {
+    "ast_graph": "AST\\fenwick_tree.py.pkl",
+    "image": "AST\\images\\fenwick_tree.py.png",
+    "queries": "queries\\query_fenwick.json"
+  },
+  "flasky": {
+    "ast_graph": "AST\\flasky.pkl",
+    "image": null,
+    "queries": null
+  },
+  "Neural-Networks-from-Scratch": {
+    "ast_graph": "AST\\Neural-Networks-from-Scratch.pkl",
+    "image": "AST\\images\\Neural-Networks-from-Scratch.png",
+    "queries": null
+  },
+  "pyneatR": {
+    "ast_graph": "AST\\pyneatR.pkl",
+    "image": "AST\\images\\pyneatR.png",
+    "queries": null
+  },
+  "python-fire": {
+    "ast_graph": "AST\\python-fire.pkl",
+    "image": null,
+    "queries": null
+  }
+}

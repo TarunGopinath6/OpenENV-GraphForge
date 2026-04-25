@@ -17,7 +17,7 @@ def ensure_dirs():
 
 
 def save_graph(graph, repo_name):
-    graph_path = f"./AST/{repo_name}.pkl"
+    graph_path = f"./AST/{repo_name.split('/')[-1]}.pkl"
     
     with open(graph_path, "wb") as f:
         pickle.dump(graph, f)
@@ -26,6 +26,9 @@ def save_graph(graph, repo_name):
 
 
 def save_graph_image(graph, repo_name):
+    if len(graph.nodes) > 300:
+        print(f"[!] Graph too large to visualize ({len(graph.nodes)} nodes), skipping image")
+        return
     image_path = f"./AST/images/{repo_name}.png"
 
     plt.figure(figsize=(12, 10))

@@ -1,0 +1,129 @@
+[
+  {
+    "complexity": "Low",
+    "task": "Refactor the valid_connection function to use more descriptive variable names for curr_ind (e.g., current_path_length) and update the docstrings and doctests to match.",
+    "central_node": "./codebases/hamiltonian_tree.py::valid_connection",
+    "subgraph": {
+      "nodes": {
+        "./codebases/hamiltonian_tree.py::valid_connection": {
+          "type": "function"
+        }
+      },
+      "edges": []
+    }
+  },
+  {
+    "complexity": "Medium",
+    "task": "Implement a find_all_hamiltonian_cycles(graph) function. It should be a generator or return a list of all distinct Hamiltonian cycles in the graph, rather than just the first one found by hamilton_cycle.",
+    "central_node": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+    "subgraph": {
+      "nodes": {
+        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+          "type": "function"
+        }
+      },
+      "edges": []
+    }
+  },
+  {
+    "complexity": "Medium",
+    "task": "Implement a function is_hamiltonian_guaranteed(graph) that checks Dirac\u2019s Theorem: if a simple graph has n >= 3 vertices and each vertex has degree >= n/2, then the graph is Hamiltonian. Use this as a fast-path optimization.",
+    "central_node": "./codebases/hamiltonian_tree.py",
+    "subgraph": {
+      "nodes": {
+        "./codebases/hamiltonian_tree.py": {
+          "type": "module"
+        },
+        "./codebases/hamiltonian_tree.py::valid_connection": {
+          "type": "function"
+        },
+        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+          "type": "function"
+        },
+        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+          "type": "function"
+        }
+      },
+      "edges": [
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::valid_connection",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+          "attributes": {
+            "relation": "contains"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "complexity": "Medium-High",
+    "task": "Create a hamiltonian_path(graph, start_node, end_node) function that finds a path visiting every vertex exactly once, specifically starting at start_node and ending at end_node. You may need to adapt the util_hamilton_cycle logic.",
+    "central_node": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+    "subgraph": {
+      "nodes": {
+        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+          "type": "function"
+        }
+      },
+      "edges": []
+    }
+  },
+  {
+    "complexity": "High",
+    "task": "Implement the Held-Karp algorithm using dynamic programming and bitmasking to solve the Hamiltonian Cycle problem. This should be more efficient for dense graphs than the current backtracking approach. Compare its performance with the existing backtracking implementation.",
+    "central_node": "./codebases/hamiltonian_tree.py",
+    "subgraph": {
+      "nodes": {
+        "./codebases/hamiltonian_tree.py": {
+          "type": "module"
+        },
+        "./codebases/hamiltonian_tree.py::valid_connection": {
+          "type": "function"
+        },
+        "./codebases/hamiltonian_tree.py::util_hamilton_cycle": {
+          "type": "function"
+        },
+        "./codebases/hamiltonian_tree.py::hamilton_cycle": {
+          "type": "function"
+        }
+      },
+      "edges": [
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::valid_connection",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::util_hamilton_cycle",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/hamiltonian_tree.py",
+          "target": "./codebases/hamiltonian_tree.py::hamilton_cycle",
+          "attributes": {
+            "relation": "contains"
+          }
+        }
+      ]
+    }
+  }
+]

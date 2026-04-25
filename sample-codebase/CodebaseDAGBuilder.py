@@ -10,11 +10,16 @@ class CodebaseDAGBuilder:
         self.current_scope = []
 
     def build(self):
+        if os.path.isfile(self.root_dir):
+            self.process_file(self.root_dir)
+            return self.graph
         for root, _, files in os.walk(self.root_dir):
             for file in files:
                 if file.endswith(".py"):
-                    filepath = os.path.join(root, file)
-                    self.process_file(filepath)
+                    self.process_file(os.path.join(root, file))
+        if not nx.is_directed_acyclic_graph(self.graph):
+            cycles = list(nx.simple_cycles(self.graph))
+            print(f"[!] Warning: {len(cycles)} cycle(s) detected — graph is not a strict DAG")
         return self.graph
 
     def process_file(self, filepath):
@@ -57,7 +62,6 @@ class CodebaseDAGBuilder:
         class_name = f"{self.get_current_scope_name()}::{node.name}"
         self.add_node(class_name, "class")
         self.add_edge(self.get_current_scope_name(), class_name, "contains")
-
         self.current_scope.append(node.name)
         self.generic_visit(node)
         self.current_scope.pop()
@@ -66,7 +70,6 @@ class CodebaseDAGBuilder:
         func_name = f"{self.get_current_scope_name()}::{node.name}"
         self.add_node(func_name, "function")
         self.add_edge(self.get_current_scope_name(), func_name, "contains")
-
         self.current_scope.append(node.name)
         self.generic_visit(node)
         self.current_scope.pop()
@@ -78,17 +81,11 @@ class CodebaseDAGBuilder:
 
     def visit_Call(self, node):
         caller = self.get_current_scope_name()
-
         if isinstance(node.func, ast.Name):
             callee = node.func.id
-        elif isinstance(node.func, ast.Attribute):
-            callee = node.func.attr
-        else:
-            callee = "unknown_call"
-
-        self.add_node(callee, "external_or_function")
-        self.add_edge(caller, callee, "calls")
-
+            if callee in self.graph:
+                self.add_edge(caller, callee, "calls")
+        # Skip unresolvable attribute calls — they clutter the graph
         self.generic_visit(node)
 
     def visit_Import(self, node):

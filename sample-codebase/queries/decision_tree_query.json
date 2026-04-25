@@ -1,0 +1,190 @@
+[
+  {
+    "complexity": "Medium",
+    "central_node": "./codebases/decision_tree.py::DecisionTree",
+    "task": "Add a score method to the DecisionTree class to evaluate model performance (MSE) on a test set, and refactor the train method to use this score method for internal validation if a validation set is provided.",
+    "subgraph": {
+      "nodes": {
+        "./codebases/decision_tree.py::DecisionTree": {
+          "type": "class"
+        },
+        "./codebases/decision_tree.py::DecisionTree::mean_squared_error": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::__init__": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::train": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::predict": {
+          "type": "function"
+        }
+      },
+      "edges": [
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::__init__",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::mean_squared_error",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::train",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::predict",
+          "attributes": {
+            "relation": "contains"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "complexity": "Low",
+    "task": "Implement a get_max_depth(self) method that recursively traverses the tree and returns the maximum depth reached by any leaf node.",
+    "central_node": "./codebases/decision_tree.py::DecisionTree",
+    "subgraph": {
+      "nodes": {
+        "./codebases/decision_tree.py::DecisionTree": {
+          "type": "class"
+        },
+        "./codebases/decision_tree.py::DecisionTree::mean_squared_error": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::__init__": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::train": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::predict": {
+          "type": "function"
+        }
+      },
+      "edges": [
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::__init__",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::mean_squared_error",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::train",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::predict",
+          "attributes": {
+            "relation": "contains"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "complexity": "Medium",
+    "task": "Add support for Mean Absolute Error (MAE) as an alternative splitting criterion. Add a criterion parameter to __init__, implement a mean_absolute_error method, and update the train logic to use the selected metric.",
+    "central_node": "./codebases/decision_tree.py::DecisionTree::mean_squared_error",
+    "subgraph": {
+      "nodes": {
+        "./codebases/decision_tree.py::DecisionTree::mean_squared_error": {
+          "type": "function"
+        }
+      },
+      "edges": []
+    }
+  },
+  {
+    "complexity": "Medium-High",
+    "task": "Implement a to_dict(self) method that returns a nested dictionary representation of the trained decision tree (including boundaries and predictions). This is useful for serializing the model structure without using pickle.",
+    "central_node": "./codebases/decision_tree.py::DecisionTree",
+    "subgraph": {
+      "nodes": {
+        "./codebases/decision_tree.py::DecisionTree": {
+          "type": "class"
+        },
+        "./codebases/decision_tree.py::DecisionTree::mean_squared_error": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::__init__": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::train": {
+          "type": "function"
+        },
+        "./codebases/decision_tree.py::DecisionTree::predict": {
+          "type": "function"
+        }
+      },
+      "edges": [
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::__init__",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::mean_squared_error",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::train",
+          "attributes": {
+            "relation": "contains"
+          }
+        },
+        {
+          "source": "./codebases/decision_tree.py::DecisionTree",
+          "target": "./codebases/decision_tree.py::DecisionTree::predict",
+          "attributes": {
+            "relation": "contains"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "complexity": "High",
+    "task": "Refactor the entire DecisionTree class to support multi-dimensional input features (x as NxD array). Update the train method to iterate through all feature dimensions to find the global best split point at each node.",
+    "central_node": "./codebases/decision_tree.py::DecisionTree::train",
+    "subgraph": {
+      "nodes": {
+        "./codebases/decision_tree.py::DecisionTree::train": {
+          "type": "function"
+        }
+      },
+      "edges": []
+    }
+  }
+]
