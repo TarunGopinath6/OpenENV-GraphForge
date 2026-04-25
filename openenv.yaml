@@ -1,0 +1,48 @@
+name: graphforge
+version: "1.0.0"
+description: >
+  OpenENV environment for RL-driven Python module graph construction.
+  An agent incrementally declares function nodes, call edges, modules, and
+  body templates; on submission the graph is materialized to Python source
+  and verified with mypy and property-based behavioral tests.
+
+author: fin1solutions
+base_url: https://huggingface.co/spaces/fin1solutions/OpenENV-GraphForge
+tags:
+  - graph
+  - code-generation
+  - reinforcement-learning
+  - openenv
+  - long-horizon-planning
+
+client:
+  class_name: GraphForgeClient
+  module: client
+
+action:
+  class_name: GraphAction
+  module: models
+
+observation:
+  class_name: GraphObservation
+  module: models
+
+env_class: server.environment.GraphForgeEnvironment
+reward_range: [-20.0, 90.0]
+
+tasks:
+  - name: tier1_pipeline
+    description: "Simple 1-2 module pipeline, 5-8 functions"
+    difficulty: easy
+  - name: tier2_multi_module
+    description: "3-4 module system, 10-18 functions"
+    difficulty: medium
+  - name: tier3_complex_system
+    description: "5-7 module system, 18-30 functions, type-consistent"
+    difficulty: hard
+
+deployment:
+  port: 7860
+  dockerfile: Dockerfile
+  enable_web_interface: true
+  health_endpoint: /health
