@@ -133,8 +133,10 @@ class ASTEnvironment(Environment[ASTAction, ASTObservation, ASTState]):
 
         context_nodes, context_edges = self._seed_context(query_obj)
 
+        logs_dir = os.path.join(_PROJECT_ROOT, "logs")
+        os.makedirs(logs_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        log_path = os.path.join(_PROJECT_ROOT, f"logs-{timestamp}.txt")
+        log_path = os.path.join(logs_dir, f"logs-{timestamp}.txt")
         eid = episode_id or str(uuid.uuid4())
 
         self._state = ASTState(
