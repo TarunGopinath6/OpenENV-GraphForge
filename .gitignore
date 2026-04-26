@@ -54,3 +54,6 @@ data/*
 # OS
 .DS_Store
 Thumbs.db
+
+# PNG visualizations not used by the server
+sample-codebase/AST/images/
