@@ -21,3 +21,5 @@ rich>=14.2.0
 
 # Claude agent SDK (used by sample-codebase/run_episode.py)
 anthropic>=0.50.0
+
+networkx>=3.3

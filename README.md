@@ -1,3 +1,12 @@
+---
+title: OpenENV GraphForge
+emoji: 🌐
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # GraphForge OpenENV
 
 A graph-based optimization and learning environment built on the OpenENV framework.

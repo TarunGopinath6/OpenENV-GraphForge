@@ -58,8 +58,3 @@ Thumbs.db
 
 # Binary AST files — upload separately via hf upload
 sample-codebase/AST/images/
-sample-codebase/AST/*.pkl
-
-# Codebases not used by active queries
-sample-codebase/codebases/flasky/
-sample-codebase/codebases/python-fire/
