@@ -31,7 +31,7 @@ GraphForge is an **OpenEnv-compliant environment** ([`env/`](./env/)) where the 
 
 ```
 ┌───────────────────────────┐
-│  Agent (Qwen2.5-0.5B)     │
+│  Agent (Qwen2.5-3B)     │
 │  reasons over KG overview │
 │  emits one JSON action    │
 └────────────┬──────────────┘
@@ -110,7 +110,7 @@ We use **GRPO (Group Relative Policy Optimization)** with LoRA fine-tuning ([`tr
 ```bash
 # Reproduce locally
 pip install -e ".[training]"
-python -m training.train --model Qwen/Qwen2.5-0.5B-Instruct --epochs 3
+python -m training.train --model Qwen/Qwen2.5-3B-Instruct --epochs 3
 
 # Quick smoke-test (no GPU needed)
 python -m training.train --dry-run

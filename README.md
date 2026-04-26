@@ -2,11 +2,12 @@
 
 **A graph-first code-editing RL environment for Python repositories, built on [OpenEnv](https://github.com/meta-pytorch/OpenEnv).**
 
-|                       |                                                                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **GitHub**            | https://github.com/nithin062006/scaler                                                                                                                                    |
-| **HuggingFace Space** | [TarunGopinath/OpenENV-GraphForge](https://huggingface.co/spaces/TarunGopinath/OpenENV-GraphForge)                                                                        |
-| **Training notebook** | [Open in GitHub - /results/grpo_lora_graphforge -final.ipynb](https://github.com/TarunGopinath6/OpenENV-GraphForge/blob/main/results/grpo_lora_graphforge%20-final.ipynb) |
+|                       |                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GitHub**            | https://github.com/TarunGopinath6/OpenENV-GraphForge                                                                                                                                        |
+| **HuggingFace Space** | [TarunGopinath/OpenENV-GraphForge](https://huggingface.co/spaces/TarunGopinath/OpenENV-GraphForge)                                                                                          |
+| **Training notebook** | [Open in HuggingFace - /results/grpo_lora_graphforge -final.ipynb](https://huggingface.co/spaces/TarunGopinath/OpenENV-GraphForge/blob/main/results/grpo_lora_graphforge%20-%20final.ipynb) |
+| **Blog**              | [BLOG.md](./BLOG.md)                                                                                                                                                                        |
 
 ---
 
@@ -29,6 +30,8 @@ The Agent can query more nodes, and explore the graph or manipulate by adding, m
 
 This trains the Agent to explore a codebase using this graph, to store only information rich context and not noise, while improving structured reasoning and output efficiency as it generates only the code snippet that's required for the manipulation option.
 
+![GIF](./results/gif-1.png)
+
 ## 3. Environment
 
 GraphForge is an **OpenEnv-compliant reinforcement-learning environment** ([`GitHub - OpenEnv`](https://github.com/meta-pytorch/OpenEnv)) where the agent incrementally **constructs a DAG Python call graph** to satisfy a code-architecture task, then materializes it to real Python source files for scoring.
@@ -49,7 +52,7 @@ Two hard budget limits - **turn cap** and **token budget** - bound every episode
 
 ```
 ┌──────────────────────────────────────────┐
-│  Agent (Qwen2.5-0.5B)                    │
+│  Agent (Qwen2.5-3B)                    │
 │  reasons over GraphObservation           │
 │  emits one GraphAction per step          │
 └──────────────────┬───────────────────────┘

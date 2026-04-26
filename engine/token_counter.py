@@ -11,11 +11,11 @@ from models import GraphAction, GraphObservation
 class TokenCounter:
     """Counts tokens in strings and serialized observations/actions.
 
-    Uses the Qwen2.5-0.5B-Instruct tokenizer when available; falls back to
+    Uses the Qwen2.5-3B-Instruct tokenizer when available; falls back to
     a character-length approximation (1 token per 4 chars) otherwise.
     """
 
-    _MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
+    _MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
 
     def __init__(self, model_name: Optional[str] = None) -> None:
         self._tokenizer = None
