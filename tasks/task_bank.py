@@ -60,6 +60,10 @@ def _tier1_simple_pipeline(variant: int) -> TaskSpec:
         _cid("error_handling_present", f"pipeline.{f[2]}", hidden=True),
         _cid("dag_depth_max", "", value=5),
     ]
+    if variant >= 2:
+        constraints.append(_cid("edge_exists", f"pipeline.{f[0]}::pipeline.{f[1]}"))
+    if variant == 3:
+        constraints.append(_cid("edge_exists", f"pipeline.{f[2]}::pipeline.{f[3]}"))
 
     behavioral_tests = []
     if variant == 0:
@@ -119,6 +123,10 @@ def _tier1_validator_chain(variant: int) -> TaskSpec:
         _cid("dag_depth_max", "", value=4, hidden=True),
         _cid("fan_in_max", f"validators.{f[4]}", value=4),
     ]
+    if variant >= 2:
+        constraints.append(_cid("edge_exists", f"validators.{f[0]}::validators.{f[1]}"))
+    if variant == 3:
+        constraints.append(_cid("edge_exists", f"validators.{f[3]}::validators.{f[4]}"))
 
     behavioral_tests = []
     if variant % 2 == 0:
@@ -178,6 +186,8 @@ def _tier1_transform_reduce(variant: int) -> TaskSpec:
         _cid("pure_function", f"transform.{f[1]}"),
         _cid("no_any_types", "", hidden=True),
     ]
+    if variant >= 2:
+        constraints.append(_cid("edge_exists", f"transform.{f[2]}::transform.{f[3]}"))
 
     return TaskSpec(
         task_id=f"t1_transform_v{variant}",
@@ -227,6 +237,10 @@ def _tier1_config_loader(variant: int) -> TaskSpec:
         _cid("dag_depth_max", "", value=5, hidden=True),
         _cid("entrypoint_exists", f"config.{f[4]}", value=None),
     ]
+    if variant >= 2:
+        constraints.append(_cid("edge_exists", f"config.{f[2]}::config.{f[3]}"))
+    if variant == 3:
+        constraints.append(_cid("edge_exists", f"config.{f[0]}::config.{f[1]}"))
 
     behavioral_tests = [
         BehavioralTest(
@@ -776,9 +790,9 @@ def _tier3_microservice(variant: int) -> TaskSpec:
     for name in api_funcs:  constraints.append(_cid("node_exists", f"api.{name}"))
     constraints += [
         _cid("module_count", "", value=5),
-        _cid("module_responsibility", "auth", value="validation", hidden=True),
+        _cid("module_responsibility", "auth", value="validation"),
         _cid("module_responsibility", "validation", value="validation"),
-        _cid("module_responsibility", "core", value="orchestration", hidden=True),
+        _cid("module_responsibility", "core", value="orchestration"),
         _cid("module_responsibility", "storage", value="io"),
         _cid("module_responsibility", "api", value="io"),
         _cid("acyclic_imports", ""),
@@ -791,15 +805,15 @@ def _tier3_microservice(variant: int) -> TaskSpec:
         _cid("error_handling_present", "storage.persist_entity"),
         _cid("error_handling_present", "storage.begin_tx", hidden=True),
         _cid("error_handling_present", "api.handle_error"),
-        _cid("edge_exists", "api.authenticate::auth.verify_token", hidden=True),
-        _cid("edge_exists", "api.dispatch::core.execute_operation", hidden=True),
+        _cid("edge_exists", "api.authenticate::auth.verify_token"),
+        _cid("edge_exists", "api.dispatch::core.execute_operation"),
         _cid("edge_exists", "core.execute_operation::storage.persist_entity", hidden=True),
         _cid("edge_exists", "core.execute_operation::validation.check_uniqueness", hidden=True),
         _cid("internal_only", "storage.begin_tx", hidden=True),
         _cid("internal_only", "storage.commit_tx", hidden=True),
         _cid("fan_in_max", "core.execute_operation", value=2, hidden=True),
         _cid("fan_out_max", "core.execute_operation", value=5, hidden=True),
-        _cid("no_any_types", "", hidden=True),
+        _cid("no_any_types", ""),
         _cid("type_consistency", "", hidden=True),
         _cid("module_size_max", "auth", value=6),
         _cid("module_size_max", "storage", value=6, hidden=True),
@@ -863,10 +877,10 @@ def _tier3_query_engine(variant: int) -> TaskSpec:
     for name in fmt_funcs:   constraints.append(_cid("node_exists", f"formatter.{name}"))
     constraints += [
         _cid("module_count", "", value=6),
-        _cid("module_responsibility", "lexer", value="transform", hidden=True),
+        _cid("module_responsibility", "lexer", value="transform"),
         _cid("module_responsibility", "parser", value="transform"),
-        _cid("module_responsibility", "planner", value="orchestration", hidden=True),
-        _cid("module_responsibility", "optimizer", value="transform", hidden=True),
+        _cid("module_responsibility", "planner", value="orchestration"),
+        _cid("module_responsibility", "optimizer", value="transform"),
         _cid("module_responsibility", "executor", value="io"),
         _cid("module_responsibility", "formatter", value="io"),
         _cid("acyclic_imports", ""),
@@ -875,11 +889,11 @@ def _tier3_query_engine(variant: int) -> TaskSpec:
         _cid("edge_exists", "parser.build_ast::planner.build_plan", hidden=True),
         _cid("edge_exists", "planner.build_plan::optimizer.apply_rules", hidden=True),
         _cid("edge_exists", "optimizer.apply_rules::executor.execute_plan", hidden=True),
-        _cid("pure_function", "lexer.tokenize", hidden=True),
+        _cid("pure_function", "lexer.tokenize"),
         _cid("pure_function", "parser.build_ast"),
         _cid("pure_function", "optimizer.apply_rules"),
         _cid("pure_function", "optimizer.push_predicates", hidden=True),
-        _cid("no_any_types", "", hidden=True),
+        _cid("no_any_types", ""),
         _cid("type_consistency", "", hidden=True),
         _cid("fan_out_max", "planner.build_plan", value=3, hidden=True),
         _cid("fan_out_max", "executor.execute_plan", value=4, hidden=True),
@@ -950,9 +964,9 @@ def _tier3_workflow_engine(variant: int) -> TaskSpec:
     constraints += [
         _cid("module_count", "", value=5),
         _cid("module_responsibility", "definition", value="transform"),
-        _cid("module_responsibility", "scheduler", value="orchestration", hidden=True),
+        _cid("module_responsibility", "scheduler", value="orchestration"),
         _cid("module_responsibility", "executor", value="orchestration"),
-        _cid("module_responsibility", "state", value="io", hidden=True),
+        _cid("module_responsibility", "state", value="io"),
         _cid("module_responsibility", "monitor", value="io"),
         _cid("acyclic_imports", ""),
         _cid("dag_depth_max", "", value=12, hidden=True),
@@ -962,13 +976,13 @@ def _tier3_workflow_engine(variant: int) -> TaskSpec:
         _cid("error_handling_present", "executor.run_task"),
         _cid("error_handling_present", "executor.retry_task", hidden=True),
         _cid("error_handling_present", "state.update_state", hidden=True),
-        _cid("edge_exists", "scheduler.build_schedule::executor.start_task", hidden=True),
-        _cid("edge_exists", "executor.run_task::state.update_state", hidden=True),
+        _cid("edge_exists", "scheduler.build_schedule::executor.start_task"),
+        _cid("edge_exists", "executor.run_task::state.update_state"),
         _cid("edge_exists", "executor.collect_result::monitor.record_event", hidden=True),
         _cid("internal_only", "state.init_state", hidden=True),
         _cid("fan_in_max", "state.update_state", value=3, hidden=True),
         _cid("fan_out_max", "executor.run_task", value=4, hidden=True),
-        _cid("no_any_types", "", hidden=True),
+        _cid("no_any_types", ""),
         _cid("type_consistency", "", hidden=True),
         _cid("return_type", "definition.validate_task", value="bool"),
         _cid("return_type", "monitor.generate_report", value="dict", hidden=True),
@@ -1035,10 +1049,10 @@ def _tier3_plugin_system(variant: int) -> TaskSpec:
     constraints += [
         _cid("module_count", "", value=7),
         _cid("module_responsibility", "discovery", value="io"),
-        _cid("module_responsibility", "loader", value="orchestration", hidden=True),
+        _cid("module_responsibility", "loader", value="orchestration"),
         _cid("module_responsibility", "validator", value="validation"),
         _cid("module_responsibility", "registry", value="orchestration"),
-        _cid("module_responsibility", "lifecycle", value="orchestration", hidden=True),
+        _cid("module_responsibility", "lifecycle", value="orchestration"),
         _cid("module_responsibility", "pluginapi", value="orchestration"),
         _cid("module_responsibility", "events", value="io"),
         _cid("acyclic_imports", ""),
@@ -1050,14 +1064,14 @@ def _tier3_plugin_system(variant: int) -> TaskSpec:
         _cid("return_type", "validator.check_interface", value="bool", hidden=True),
         _cid("error_handling_present", "loader.load_module"),
         _cid("error_handling_present", "registry.register_plugin", hidden=True),
-        _cid("edge_exists", "discovery.filter_compatible::loader.load_module", hidden=True),
-        _cid("edge_exists", "loader.instantiate_plugin::validator.validate_manifest", hidden=True),
+        _cid("edge_exists", "discovery.filter_compatible::loader.load_module"),
+        _cid("edge_exists", "loader.instantiate_plugin::validator.validate_manifest"),
         _cid("edge_exists", "loader.instantiate_plugin::registry.register_plugin", hidden=True),
         _cid("edge_exists", "lifecycle.on_enable::events.emit_event", hidden=True),
         _cid("internal_only", "loader.inject_dependencies", hidden=True),
         _cid("fan_in_max", "registry.register_plugin", value=2, hidden=True),
         _cid("fan_out_max", "pluginapi.call_hook", value=3, hidden=True),
-        _cid("no_any_types", "", hidden=True),
+        _cid("no_any_types", ""),
         _cid("type_consistency", "", hidden=True),
         _cid("module_size_max", "validator", value=4, hidden=True),
         _cid("module_size_max", "lifecycle", value=5),
@@ -1106,9 +1120,13 @@ def _simple_type_test(module: str, func: str, expected_type: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    ret_name = getattr(ret, '__name__', None) or str(ret)
+    assert ret_name == '{expected_type}', f"{func} return annotation must be {expected_type}, got {{ret_name!r}}"
 """
 
 
@@ -1117,9 +1135,12 @@ def _bool_return_test(module: str, func: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    assert ret is bool or str(ret) == 'bool', f"{func} return annotation must be bool, got {{ret!r}}"
 """
 
 
@@ -1128,9 +1149,12 @@ def _dict_return_test(module: str, func: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    assert ret is dict or str(ret) == 'dict', f"{func} return annotation must be dict, got {{ret!r}}"
 """
 
 
@@ -1139,13 +1163,17 @@ def _list_return_test(module: str, func: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    assert ret is list or str(ret) == 'list', f"{func} return annotation must be list, got {{ret!r}}"
 """
 
 
 def _callable_test(module: str, func: str) -> str:
+    # intentionally only checks callable — used when return type is unpredictable
     return f"""\
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
@@ -1161,9 +1189,13 @@ def _nonempty_test(module: str, func: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_has_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    assert ret is not None and str(ret) not in ('None', 'type(None)'), \
+        f"{func} must have a non-None return annotation, got {{ret!r}}"
 """
 
 
@@ -1172,9 +1204,13 @@ def _numeric_return_test(module: str, func: str) -> str:
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-def test_{func}_callable():
+def test_{func}_return_annotation():
     import {module}
-    assert callable(getattr({module}, '{func}', None)), "{func} must be callable"
+    fn = getattr({module}, '{func}', None)
+    assert callable(fn), "{func} must be callable"
+    ret = getattr(fn, '__annotations__', {{}}).get('return')
+    assert ret in (int, float) or str(ret) in ('int', 'float'), \
+        f"{func} return annotation must be int or float, got {{ret!r}}"
 """
 
 

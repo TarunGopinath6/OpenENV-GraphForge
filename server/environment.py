@@ -11,6 +11,7 @@ from openenv.core import Environment
 from models import (
     ALL_ACTION_TYPES,
     ActionResult,
+    ConstraintStatus,
     ConstraintSummary,
     GraphAction,
     GraphForgeState,
@@ -49,6 +50,7 @@ class GraphForgeEnvironment(Environment[GraphAction, GraphObservation, GraphForg
         self._dispatcher = ActionDispatcher(te, btl, mat, val, tr, cc, re, tc)
         self._re = re
         self._tc = tc
+        self._mat = mat
         self._task_bank = TaskBank()
         self._state: Optional[GraphForgeState] = None
 
@@ -136,12 +138,14 @@ class GraphForgeEnvironment(Environment[GraphAction, GraphObservation, GraphForg
         # Check turn cap
         if state.step_count >= state.turn_cap and not state.is_terminal:
             state.is_terminal = True
+            state.cumulative_reward += self._forced_terminal_reward(state)
 
         # Check token budget
         if state.tokens_used >= state.token_budget and not state.is_terminal:
             state.is_terminal = True
+            state.cumulative_reward += self._forced_terminal_reward(state)
 
-        obs = self._build_observation(result)
+        obs = self._build_observation(result, repeated_action_warning=is_repeat)
         # Count response tokens
         obs_tokens = self._tc.count_observation(obs)
         state.tokens_used += obs_tokens
@@ -158,23 +162,64 @@ class GraphForgeEnvironment(Environment[GraphAction, GraphObservation, GraphForg
     # Helpers
     # -------------------------------------------------------------------------
 
-    def _build_observation(self, action_result: Optional[ActionResult]) -> GraphObservation:
+    def _forced_terminal_reward(self, state: GraphForgeState) -> float:
+        from models import MaterializeResult
+        if state.materialization_cache is not None:
+            mat_result = MaterializeResult(success=True, module_sources=state.materialization_cache)
+        else:
+            mat_result = self._mat.materialize(state.graph)
+        mypy_ok = state.last_mypy_output == "" if state.last_mypy_output is not None else False
+        all_constraints = state.task_spec.constraints if state.task_spec else []
+        visible = [c for c in all_constraints if not c.hidden]
+        return self._re.terminal_reward(
+            graph=state.graph,
+            constraints=visible,
+            test_results=state.last_test_results or [],
+            materialize_result=mat_result,
+            mypy_ok=mypy_ok,
+            tokens_used=state.tokens_used,
+            token_budget=state.token_budget,
+        )
+
+    def _build_observation(
+        self,
+        action_result: Optional[ActionResult],
+        repeated_action_warning: bool = False,
+    ) -> GraphObservation:
         if self._state is None:
             return GraphObservation(done=True)
 
         state = self._state
         task = state.task_spec
 
-        # Constraint summary (visible only)
+        # Constraint satisfaction — uses cached materialization/mypy/test results where
+        # available so that constraints like `materializes` and `type_checks` reflect reality.
         from engine.constraint_checker import ConstraintChecker
         cc = ConstraintChecker()
         visible = [c for c in (task.constraints if task else []) if not c.hidden]
-        satisfied, total = cc.count_satisfied(state.graph, visible)
+
+        materialize_ok = state.materialization_cache is not None
+        mypy_ok = state.last_mypy_output == "" if state.last_mypy_output is not None else False
+        test_results_map = {r.test_id: r.passed for r in (state.last_test_results or [])}
+
+        satisfaction = cc.check_all_with_cache(
+            state.graph,
+            visible,
+            materialize_ok=materialize_ok,
+            imports_ok=materialize_ok,
+            mypy_ok=mypy_ok,
+            test_results=test_results_map,
+        )
+
+        constraint_statuses = [
+            ConstraintStatus(**c.model_dump(), satisfied=satisfaction[c.constraint_id])
+            for c in visible
+        ]
         summary = ConstraintSummary(
             total=len(task.constraints) if task else 0,
             visible=len(visible),
             hidden=len(task.constraints) - len(visible) if task else 0,
-            satisfied_visible=satisfied,
+            satisfied_visible=sum(satisfaction.values()),
         )
 
         # Available actions depend on state
@@ -199,7 +244,8 @@ class GraphForgeEnvironment(Environment[GraphAction, GraphObservation, GraphForg
             graph_state=state.graph,
             last_action_result=action_result,
             constraint_summary=summary,
-            visible_constraints=visible,
+            visible_constraints=constraint_statuses,
+            repeated_action_warning=repeated_action_warning,
             available_actions=available,
             task_description=task.description if task else "",
         )

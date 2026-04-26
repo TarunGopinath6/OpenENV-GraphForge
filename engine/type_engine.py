@@ -143,7 +143,13 @@ class TypeEngine:
     # ---------------------------------------------------------------------------
 
     def build_import_graph(self, graph: GraphState) -> Dict[str, Set[str]]:
-        """Return adjacency dict: module -> set of modules it imports."""
+        """Return adjacency dict: module -> set of modules it imports.
+
+        Edges are projected to the module level (caller_module -> callee_module).
+        Intra-module edges (same module on both sides) are ignored. This graph
+        represents import dependencies only — call-graph cycles within a single
+        module are not represented and are not considered errors.
+        """
         modules = {m.name for m in graph.modules}
         adj: Dict[str, Set[str]] = {m: set() for m in modules}
         for edge in graph.edges:

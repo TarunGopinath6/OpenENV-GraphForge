@@ -7,7 +7,7 @@ and the AST-query episode environment.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -115,16 +115,6 @@ class GraphState(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class ActionResult(BaseModel):
-    """Outcome of dispatching one action."""
-
-    success: bool
-    error_kind: Optional[str] = None
-    error_msg: Optional[str] = None
-    query_response: Optional[Any] = None
-    penalty: float = 0.0
-
-
 class MaterializeResult(BaseModel):
     """Outcome of materializing the graph to Python source."""
 
@@ -142,6 +132,115 @@ class TestResult(BaseModel):
     error_msg: Optional[str] = None
 
 
+class ConstraintCheckEntry(BaseModel):
+    """One constraint's satisfaction result, as returned by query_spec."""
+
+    id: str
+    kind: str
+    target: str
+    satisfied: bool
+
+
+class QuerySpecResponse(BaseModel):
+    """Typed response for the query_spec action."""
+
+    response_type: Literal["query_spec"] = "query_spec"
+    total_visible: int
+    satisfied: int
+    unsatisfied: int
+    constraints: List[ConstraintCheckEntry]
+
+
+class QuerySubgraphResponse(BaseModel):
+    """Typed response for the query_subgraph action.
+
+    Populated fields depend on scope prefix:
+    - module:<name>   → nodes, edges
+    - neighbors:<qn>  → node, callers, callees
+    - path:<a>:<b>    → path
+    """
+
+    response_type: Literal["query_subgraph"] = "query_subgraph"
+    scope: str
+    nodes: Optional[List[str]] = None
+    edges: Optional[List[str]] = None
+    node: Optional[str] = None
+    callers: Optional[List[str]] = None
+    callees: Optional[List[str]] = None
+    path: Optional[List[str]] = None
+
+
+class NodeTypeInfo(BaseModel):
+    """Type information for a single graph node."""
+
+    params: Dict[str, str]
+    return_type: str
+    has_any: bool
+
+
+class QueryTypesResponse(BaseModel):
+    """Typed response for the query_types action."""
+
+    response_type: Literal["query_types"] = "query_types"
+    nodes: Dict[str, NodeTypeInfo]
+    type_errors: List[str]
+
+
+class MaterializeValidateResponse(BaseModel):
+    """Typed response for the materialize_and_validate action."""
+
+    response_type: Literal["materialize_and_validate"] = "materialize_and_validate"
+    materialized: bool
+    parse_errors: List[str]
+    mypy_ok: bool
+    mypy_errors: List[str]
+
+
+class TestRunResponse(BaseModel):
+    """Typed response for the run_behavioral_tests action."""
+
+    response_type: Literal["run_behavioral_tests"] = "run_behavioral_tests"
+    results: List["TestResult"]
+    passed: int
+    total: int
+
+
+class SubmitResponse(BaseModel):
+    """Typed response for the submit action."""
+
+    response_type: Literal["submit"] = "submit"
+    terminal_reward: float
+    mypy_ok: bool = False
+    tests_passed: int = 0
+    tests_total: int = 0
+    hidden_constraints_satisfied: int = 0
+    hidden_constraints_total: int = 0
+    materialization_failed: bool = False
+
+
+_QueryResponse = Annotated[
+    Union[
+        QuerySpecResponse,
+        QuerySubgraphResponse,
+        QueryTypesResponse,
+        MaterializeValidateResponse,
+        TestRunResponse,
+        SubmitResponse,
+    ],
+    Field(discriminator="response_type"),
+]
+
+
+class ActionResult(BaseModel):
+    """Outcome of dispatching one action."""
+
+    success: bool
+    error_kind: Optional[str] = None
+    error_msg: Optional[str] = None
+    query_response: Optional[_QueryResponse] = None
+    penalty: float = 0.0
+
+
 class ConstraintSpec(BaseModel):
     """A single mechanically-checkable constraint."""
 
@@ -150,6 +249,12 @@ class ConstraintSpec(BaseModel):
     target: str  # dotted path e.g. "module.func" or just "module_name"
     value: Any = None
     hidden: bool = False
+
+
+class ConstraintStatus(ConstraintSpec):
+    """A constraint annotated with its current satisfaction state for a given graph."""
+
+    satisfied: bool
 
 
 class ConstraintSummary(BaseModel):
@@ -201,7 +306,8 @@ class GraphObservation(Observation):
     graph_state: GraphState = Field(default_factory=GraphState)
     last_action_result: Optional[ActionResult] = None
     constraint_summary: ConstraintSummary = Field(default_factory=ConstraintSummary)
-    visible_constraints: List[ConstraintSpec] = Field(default_factory=list)
+    visible_constraints: List[ConstraintStatus] = Field(default_factory=list)
+    repeated_action_warning: bool = False
     available_actions: List[str] = Field(default_factory=list)
     task_description: str = ""
 

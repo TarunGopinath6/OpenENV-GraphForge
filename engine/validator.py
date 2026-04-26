@@ -112,7 +112,13 @@ class Validator:
     def full_validate(
         self, module_sources: Dict[str, str], strict: bool = True
     ) -> MaterializeResult:
-        """Run all three checks in sequence; short-circuit on parse failure."""
+        """Run all three checks in sequence.
+
+        Order: parse → import resolution → mypy. A parse failure short-circuits
+        immediately — mypy is never invoked on unparseable source. mypy runs on
+        the full temp directory (package scope), not per-file, so cross-module
+        import resolution works correctly.
+        """
         parse_errors = self.parse_check(module_sources)
         if parse_errors:
             return MaterializeResult(

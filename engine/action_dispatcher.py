@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from models import (
     ActionResult,
+    ConstraintCheckEntry,
     EdgeArgMapping,
     GraphAction,
     GraphEdge,
@@ -15,7 +16,14 @@ from models import (
     GraphModule,
     GraphNode,
     GraphState,
+    MaterializeValidateResponse,
     NodeSignature,
+    NodeTypeInfo,
+    QuerySpecResponse,
+    QuerySubgraphResponse,
+    QueryTypesResponse,
+    SubmitResponse,
+    TestRunResponse,
 )
 from engine.behavioral_test_runner import BehavioralTestRunner
 from engine.body_template_library import BodyTemplateLibrary, TemplateNotFoundError
@@ -25,6 +33,13 @@ from engine.reward_engine import RewardEngine
 from engine.token_counter import TokenCounter
 from engine.type_engine import SignatureParseError, TypeEngine
 from engine.validator import Validator
+
+
+GRAPH_MUTATING_ACTIONS: frozenset[str] = frozenset({
+    "add_module", "remove_module",
+    "add_node", "remove_node", "set_node_module", "attach_body",
+    "add_edge", "remove_edge",
+})
 
 
 class ActionDispatcher:
@@ -70,6 +85,9 @@ class ActionDispatcher:
         if not result.success:
             # Roll back graph mutation
             state = state.model_copy(update={"graph": graph_snapshot})
+        elif action.action_type in GRAPH_MUTATING_ACTIONS:
+            # Invalidate cache: any graph change makes the prior materialisation stale
+            state.materialization_cache = None
 
         return state, result
 
@@ -244,7 +262,12 @@ class ActionDispatcher:
 
     def _handle_query_spec(self, state: GraphForgeState, params: Dict) -> ActionResult:
         if state.task_spec is None:
-            return ActionResult(success=True, query_response={"total_visible": 0, "satisfied": 0, "unsatisfied": 0, "visible_constraints": [], "summary": {}})
+            return ActionResult(
+                success=True,
+                query_response=QuerySpecResponse(
+                    total_visible=0, satisfied=0, unsatisfied=0, constraints=[]
+                ),
+            )
 
         constraint_kind = params.get("constraint_kind")
         visible = [c for c in state.task_spec.constraints if not c.hidden]
@@ -257,20 +280,20 @@ class ActionDispatcher:
 
         return ActionResult(
             success=True,
-            query_response={
-                "total_visible": len(visible),
-                "satisfied": satisfied,
-                "unsatisfied": len(visible) - satisfied,
-                "constraints": [
-                    {
-                        "id": c.constraint_id,
-                        "kind": c.kind,
-                        "target": c.target,
-                        "satisfied": results[c.constraint_id],
-                    }
+            query_response=QuerySpecResponse(
+                total_visible=len(visible),
+                satisfied=satisfied,
+                unsatisfied=len(visible) - satisfied,
+                constraints=[
+                    ConstraintCheckEntry(
+                        id=c.constraint_id,
+                        kind=c.kind,
+                        target=c.target,
+                        satisfied=results[c.constraint_id],
+                    )
                     for c in visible
                 ],
-            },
+            ),
         )
 
     def _handle_query_subgraph(self, state: GraphForgeState, params: Dict) -> ActionResult:
@@ -285,11 +308,11 @@ class ActionDispatcher:
             ]
             return ActionResult(
                 success=True,
-                query_response={
-                    "scope": scope,
-                    "nodes": [f"{n.module}.{n.name}" for n in nodes],
-                    "edges": [f"{e.caller}->{e.callee}" for e in edges],
-                },
+                query_response=QuerySubgraphResponse(
+                    scope=scope,
+                    nodes=[f"{n.module}.{n.name}" for n in nodes],
+                    edges=[f"{e.caller}->{e.callee}" for e in edges],
+                ),
             )
         elif scope.startswith("neighbors:"):
             node_name = scope[len("neighbors:"):]
@@ -297,13 +320,21 @@ class ActionDispatcher:
             callees = [e.callee for e in state.graph.edges if e.caller == node_name]
             return ActionResult(
                 success=True,
-                query_response={"node": node_name, "callers": callers, "callees": callees},
+                query_response=QuerySubgraphResponse(
+                    scope=scope,
+                    node=node_name,
+                    callers=callers,
+                    callees=callees,
+                ),
             )
         elif scope.startswith("path:"):
             parts = scope[len("path:"):].split(":", 1)
             if len(parts) == 2:
                 path = self._find_path(state.graph, parts[0], parts[1])
-                return ActionResult(success=True, query_response={"path": path})
+                return ActionResult(
+                    success=True,
+                    query_response=QuerySubgraphResponse(scope=scope, path=path),
+                )
 
         return ActionResult(success=False, error_kind="invalid_scope", error_msg=f"Unrecognized scope: {scope!r}")
 
@@ -315,25 +346,22 @@ class ActionDispatcher:
             mod = scope if "." not in scope else scope.split(".")[0]
             nodes = [n for n in nodes if n.module == mod or f"{n.module}.{n.name}" == scope]
 
-        type_info = {}
+        type_info: Dict[str, NodeTypeInfo] = {}
         for n in nodes:
             key = f"{n.module}.{n.name}"
             params_info = {p.name: p.type_annotation for p in n.signature.params}
             has_any = self._te.detect_any_contamination(n)
-            type_info[key] = {
-                "params": params_info,
-                "return_type": n.signature.return_type,
-                "has_any": has_any,
-            }
+            type_info[key] = NodeTypeInfo(
+                params=params_info,
+                return_type=n.signature.return_type,
+                has_any=has_any,
+            )
 
         type_errors = self._te.check_type_consistency(state.graph)
 
         return ActionResult(
             success=True,
-            query_response={
-                "nodes": type_info,
-                "type_errors": type_errors,
-            },
+            query_response=QueryTypesResponse(nodes=type_info, type_errors=type_errors),
         )
 
     def _handle_materialize_and_validate(self, state: GraphForgeState, params: Dict) -> ActionResult:
@@ -344,7 +372,12 @@ class ActionDispatcher:
                 success=False,
                 error_kind="materialization_failed",
                 error_msg="; ".join(mat_result.parse_errors),
-                query_response=mat_result.model_dump(),
+                query_response=MaterializeValidateResponse(
+                    materialized=False,
+                    parse_errors=mat_result.parse_errors,
+                    mypy_ok=False,
+                    mypy_errors=[],
+                ),
             )
 
         val_result = self._val.full_validate(mat_result.module_sources)
@@ -353,12 +386,12 @@ class ActionDispatcher:
 
         return ActionResult(
             success=True,
-            query_response={
-                "materialized": True,
-                "parse_errors": val_result.parse_errors,
-                "mypy_ok": len(val_result.mypy_errors) == 0,
-                "mypy_errors": val_result.mypy_errors,
-            },
+            query_response=MaterializeValidateResponse(
+                materialized=True,
+                parse_errors=val_result.parse_errors,
+                mypy_ok=len(val_result.mypy_errors) == 0,
+                mypy_errors=val_result.mypy_errors,
+            ),
         )
 
     def _handle_run_behavioral_tests(self, state: GraphForgeState, params: Dict) -> ActionResult:
@@ -378,33 +411,32 @@ class ActionDispatcher:
         state.last_test_results = results
         return ActionResult(
             success=True,
-            query_response={
-                "results": [r.model_dump() for r in results],
-                "passed": sum(1 for r in results if r.passed),
-                "total": len(results),
-            },
+            query_response=TestRunResponse(
+                results=results,
+                passed=sum(1 for r in results if r.passed),
+                total=len(results),
+            ),
         )
 
     def _handle_submit(self, state: GraphForgeState, params: Dict) -> ActionResult:
-        # Materialize if needed
-        if state.materialization_cache is None:
-            mat_result = self._mat.materialize(state.graph)
-            if not mat_result.success:
-                state.is_terminal = True
-                return ActionResult(
-                    success=False,
-                    error_kind="materialization_failed",
-                    error_msg="Cannot submit: graph fails to materialize",
-                    penalty=self._re.MATERIALIZE_FAIL_PENALTY,
-                    query_response={"terminal_reward": self._re.MATERIALIZE_FAIL_PENALTY},
-                )
-            state.materialization_cache = mat_result.module_sources
+        # Always materialize fresh — catches mutations made after the last validate call
+        mat_result = self._mat.materialize(state.graph)
+        if not mat_result.success:
+            fail_reward = self._re.materialize_fail_reward(mat_result)
+            state.cumulative_reward += fail_reward
+            state.is_terminal = True
+            return ActionResult(
+                success=True,
+                query_response=SubmitResponse(
+                    terminal_reward=fail_reward, materialization_failed=True
+                ),
+            )
+        state.materialization_cache = mat_result.module_sources
 
-        # Run mypy
+        # Run mypy and behavioral tests against fresh sources
         val_result = self._val.full_validate(state.materialization_cache)
         mypy_ok = len(val_result.mypy_errors) == 0
 
-        # Run behavioral tests
         test_results = state.last_test_results or []
         if state.task_spec and state.task_spec.behavioral_tests:
             test_results = self._tr.run_tests(
@@ -413,31 +445,37 @@ class ActionDispatcher:
             )
             state.last_test_results = test_results
 
-        # Compute terminal reward against all (including hidden) constraints
-        constraints = state.task_spec.constraints if state.task_spec else []
-        mat_ok_result = self._mat.materialize(state.graph)
+        all_constraints = state.task_spec.constraints if state.task_spec else []
+        visible = [c for c in all_constraints if not c.hidden]
+        hidden = [c for c in all_constraints if c.hidden]
 
         terminal_reward = self._re.terminal_reward(
             graph=state.graph,
-            constraints=constraints,
+            constraints=visible,
             test_results=test_results,
-            materialize_result=mat_ok_result,
+            materialize_result=mat_result,
             mypy_ok=mypy_ok,
             tokens_used=state.tokens_used,
             token_budget=state.token_budget,
         )
+
+        # Evaluate hidden constraints for analysis only — does not affect reward
+        hidden_results = self._cc.check_all(state.graph, hidden)
+        hidden_satisfied = sum(hidden_results.values())
 
         state.is_terminal = True
         state.cumulative_reward += terminal_reward
 
         return ActionResult(
             success=True,
-            query_response={
-                "terminal_reward": terminal_reward,
-                "mypy_ok": mypy_ok,
-                "tests_passed": sum(1 for r in test_results if r.passed),
-                "tests_total": len(test_results),
-            },
+            query_response=SubmitResponse(
+                terminal_reward=terminal_reward,
+                mypy_ok=mypy_ok,
+                tests_passed=sum(1 for r in test_results if r.passed),
+                tests_total=len(test_results),
+                hidden_constraints_satisfied=hidden_satisfied,
+                hidden_constraints_total=len(hidden),
+            ),
             penalty=0.0,
         )
 

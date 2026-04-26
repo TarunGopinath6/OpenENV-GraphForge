@@ -1,0 +1,69 @@
+-------------
+REWARD DESIGN
+-------------
+
+reward_engine.py
+
+Added SUCCESSFUL_ACTION = 0.05: applied in per_turn_reward for successful non-repeat actions. This breaks the pure-negative gradient without touching the constraint checker — the signal fires on any action that successfully mutates or queries the graph.
+Replaced MATERIALIZE_FAIL_PENALTY = -8.0 with MATERIALIZE_FAIL_BASE = -8.0 + MATERIALIZE_PARTIAL_CREDIT = 4.0. The new materialize_fail_reward method computes −8.0 + 4.0 × (ok_modules / total_modules), so the range is [−8.0, −4.0). A completely broken graph still pays −8.0; a graph with one bad module out of many pays closer to −4.0.
+action_dispatcher.py
+
+Fixed a pre-existing bug in \_handle_submit: the old code set penalty=MATERIALIZE_FAIL_PENALTY in the ActionResult but environment.py never reads ActionResult.penalty — only per_turn_reward fires, which was adding just −2.1 instead of −8.0. Now the fail reward is added directly to state.cumulative_reward.
+Returns success=True from the failed-submit path so per_turn_reward doesn't also fire MUTATION_FAIL on top of the terminal penalty. The failure is communicated via query_response["materialization_failed"].
+environment.py
+
+Stored self.\_mat so the environment can materialize independently of the dispatcher.
+Added \_forced_terminal_reward: uses the cached materialization if available, otherwise materializes fresh, then delegates to terminal_reward with whatever test results and mypy state exist. Called at both turn-cap and token-budget termination, so agents that exhaust their budget without submitting still get a meaningful gradient signal rather than silence.
+
+reward_engine.py — MUTATION_FAIL: -2.0 → -0.5. With SUCCESSFUL_ACTION = +0.05 now in the mix, the old ratio between a successful turn (−0.05 net) and a failed turn had silently grown to 42×. −0.5 brings failed turns to −0.6, settling the ratio at 12×. MALFORMED_ACTION stays at −2.0 — that's for genuinely invalid action types, not for the deterministic exploration failures the critic was concerned about.
+
+action_dispatcher.py — _handle_submit now always materializes fresh regardless of whether a cache exists. Two concrete bugs this closes: (1) mutations made after the last materialize_and_validate call were invisible to the fail-check path when a cache was present; (2) there was a redundant second self._mat.materialize(state.graph) call for mat_ok_result that has now been eliminated. A single fresh materialization drives the fail check, mypy, behavioral tests, and terminal reward — and materialization_cache is updated to the fresh sources in all cases.
+
+reward_engine.py — Removed the filter visible = [c for c in constraints if not c.hidden] and the misleading comment. terminal_reward now treats its constraints argument as authoritative — the caller's responsibility to pass only what should count toward reward. This makes the contract explicit instead of silently correcting bad inputs.
+
+action_dispatcher.py — _handle_submit now splits all_constraints into visible (passed to terminal_reward) and hidden (evaluated separately via self._cc.check_all). The hidden results go into query_response as hidden_constraints_satisfied / hidden_constraints_total — analysis-only metadata that doesn't touch the reward. The comment is gone. A researcher can now read generalization signal from the submit response without it polluting training.
+
+environment.py — _forced_terminal_reward now also filters to visible before calling terminal_reward, for the same reason.
+
+-----------------------
+STATE AND OBSERVABILITY
+-----------------------
+
+models.py
+
+Added ConstraintStatus(ConstraintSpec) — inherits all constraint fields, adds satisfied: bool. Used in GraphObservation.visible_constraints instead of bare ConstraintSpec.
+Added ConstraintCheckEntry, QuerySpecResponse, QuerySubgraphResponse, NodeTypeInfo, QueryTypesResponse, MaterializeValidateResponse, TestRunResponse, SubmitResponse — one typed model per response shape.
+_QueryResponse discriminated union ties them together; ActionResult.query_response is now Optional[_QueryResponse] instead of Optional[Any].
+GraphObservation gains repeated_action_warning: bool = False.
+engine/action_dispatcher.py
+
+GRAPH_MUTATING_ACTIONS frozenset centralises which action types dirty the graph.
+dispatch() sets state.materialization_cache = None after any successful mutation — the staleness bug is fixed at the source, not papered over in the observation.
+All six query/action handlers now return typed model instances instead of raw dicts.
+server/environment.py
+
+_build_observation calls check_all_with_cache (using materialization_cache, last_mypy_output, last_test_results) so that constraints like materializes and type_checks reflect reality rather than always returning False.
+Builds List[ConstraintStatus] from the satisfaction results and passes repeated_action_warning=is_repeat through.
+
+-----------------------
+CORE ENGINE DESIGN
+-----------------------
+
+Both changes are in. build_import_graph in type_engine.py now explicitly documents module-level projection and the exclusion of call-graph cycles. full_validate in validator.py now documents the parse short-circuit and package-scope mypy invocation. Nothing else touched.
+
+-----------
+TASK DESIGN
+-----------
+
+Behavioral test helpers — all seven now inspect fn.__annotations__['return'] instead of just calling callable(). _callable_test is the only one intentionally left as a callable-only check, since it's used where the return type genuinely can't be predicted upfront.
+
+Tier 1 structural variation — variants 0/1 remain cosmetically different (domain swap only), but variants 2/3 now require at least one edge_exists constraint, and variant 3 requires two. This means an agent can't solve v2/v3 by the same one-pass node-dump it uses for v0/v1.
+
+Tier 3 hidden ratios — now 24–27% hidden across all four templates (down from ~33–36%). Specifically exposed: all module responsibilities (agents should always know what each module is for), no_any_types (basic coding hygiene signal), and the critical-path edges in each template (the entry-point chain that defines the architecture). Kept hidden: type_consistency, dag_depth_max, fan-in/out limits, internal_only, error_handling_absent — those are legitimately discovery-through-iteration constraints.
+
+
+-----------
+TASK DESIGN
+----------- 
+
+Here's the critique from a senior RL environments engineer about the engine, don't write code, give me your opinion and proposed changes if any, but definitely push back if you think changes aren't necessary:

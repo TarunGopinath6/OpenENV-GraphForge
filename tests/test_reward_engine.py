@@ -32,8 +32,8 @@ def test_per_turn_repeat_action(re):
 def test_per_turn_success_not_repeat(re):
     result = ActionResult(success=True, penalty=0.0)
     reward = re.per_turn_reward(result, tokens_this_turn=0, is_repeat=False)
-    # base per-turn cost only
-    assert reward == pytest.approx(-0.1, abs=0.01)
+    # per-turn cost offset by successful-action bonus: -0.1 + 0.05
+    assert reward == pytest.approx(-0.05, abs=0.01)
 
 
 def test_terminal_reward_no_constraints(re):
@@ -62,6 +62,25 @@ def test_terminal_reward_materialization_fail_penalty(re):
         token_budget=4000,
     )
     assert reward <= -8.0
+
+
+def test_terminal_reward_materialization_partial_credit(re):
+    mat = MaterializeResult(
+        success=False,
+        module_sources={"mod_a": "# code", "mod_b": "# error"},
+        parse_errors=["Module 'mod_b': render error"],
+    )
+    reward = re.terminal_reward(
+        graph=GraphState(),
+        constraints=[],
+        test_results=[],
+        materialize_result=mat,
+        mypy_ok=False,
+        tokens_used=100,
+        token_budget=4000,
+    )
+    # Half modules OK: -8.0 + 4.0 * 0.5 = -6.0
+    assert reward == pytest.approx(-6.0, abs=0.01)
 
 
 def test_malformed_action_penalty(re):

@@ -109,14 +109,14 @@ def test_add_edge_cycle_fails(dispatcher, empty_state):
 def test_query_spec(dispatcher, empty_state):
     state, result = dispatcher.dispatch(empty_state, _act("query_spec"))
     assert result.success
-    assert "total_visible" in result.query_response
+    assert result.query_response.total_visible == 0
 
 
 def test_query_subgraph(dispatcher, empty_state):
     state, _ = dispatcher.dispatch(empty_state, _act("add_module", name="mod", responsibility="x"))
     state, result = dispatcher.dispatch(state, _act("query_subgraph", scope="module:mod"))
     assert result.success
-    assert "nodes" in result.query_response
+    assert result.query_response.nodes is not None
 
 
 def test_query_types(dispatcher, empty_state):
@@ -124,7 +124,7 @@ def test_query_types(dispatcher, empty_state):
     state, _ = dispatcher.dispatch(state, _act("add_node", name="f", module="m", signature="(x: int) -> bool", purity="pure", error_policy="raise"))
     state, result = dispatcher.dispatch(state, _act("query_types", scope="all"))
     assert result.success
-    assert "m.f" in result.query_response["nodes"]
+    assert "m.f" in result.query_response.nodes
 
 
 def test_materialize_and_validate(dispatcher, empty_state):

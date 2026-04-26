@@ -10,11 +10,12 @@ from models import ActionResult, MaterializeResult, ConstraintSpec, GraphState, 
 class RewardEngine:
     """Implements the GraphForge reward structure."""
 
-    # Per-turn penalties
-    MUTATION_FAIL: float = -2.0
+    # Per-turn penalties / bonuses
+    MUTATION_FAIL: float = -0.5
     MALFORMED_ACTION: float = -2.0
     REPEAT_ACTION: float = -1.0
     PER_TURN: float = -0.1
+    SUCCESSFUL_ACTION: float = 0.05
     TOKEN_ALPHA: float = 0.001
 
     # Terminal bonuses / penalties
@@ -23,7 +24,8 @@ class RewardEngine:
     ALL_STRUCTURAL_BONUS: float = 5.0
     ALL_BEHAVIORAL_BONUS: float = 5.0
     TYPE_CHECK_BONUS: float = 3.0
-    MATERIALIZE_FAIL_PENALTY: float = -8.0
+    MATERIALIZE_FAIL_BASE: float = -8.0
+    MATERIALIZE_PARTIAL_CREDIT: float = 4.0
     TOKEN_EFFICIENCY_BONUS: float = 5.0
 
     def per_turn_reward(
@@ -38,6 +40,8 @@ class RewardEngine:
             r += self.REPEAT_ACTION
         if not action_result.success:
             r += self.MUTATION_FAIL
+        elif not is_repeat:
+            r += self.SUCCESSFUL_ACTION
         return r
 
     def malformed_action_penalty(self) -> float:
@@ -54,17 +58,15 @@ class RewardEngine:
         token_budget: int,
     ) -> float:
         if not materialize_result.success:
-            return self.MATERIALIZE_FAIL_PENALTY
+            return self.materialize_fail_reward(materialize_result)
 
         r = 0.0
 
-        # Structural constraints (visible only — hidden evaluated at submit)
-        visible = [c for c in constraints if not c.hidden]
         from engine.constraint_checker import ConstraintChecker
         checker = ConstraintChecker()
-        satisfied_map = checker.check_all(graph, visible)
+        satisfied_map = checker.check_all(graph, constraints)
         n_satisfied = sum(satisfied_map.values())
-        n_total = len(visible)
+        n_total = len(constraints)
 
         r += n_satisfied * self.STRUCTURAL_PER
         if n_total > 0 and n_satisfied == n_total:
@@ -86,6 +88,13 @@ class RewardEngine:
             r += self.compute_token_efficiency_bonus(tokens_used, token_budget)
 
         return r
+
+    def materialize_fail_reward(self, mat_result: MaterializeResult) -> float:
+        total = len(mat_result.module_sources)
+        if total == 0:
+            return self.MATERIALIZE_FAIL_BASE
+        ok_frac = (total - len(mat_result.parse_errors)) / total
+        return self.MATERIALIZE_FAIL_BASE + self.MATERIALIZE_PARTIAL_CREDIT * ok_frac
 
     def compute_token_efficiency_bonus(self, tokens_used: int, token_budget: int) -> float:
         if token_budget <= 0:
