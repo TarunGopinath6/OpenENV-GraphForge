@@ -16,7 +16,7 @@ step(GraphAction) → GraphObservation    (repeat up to turn_cap times)
 submit → terminal GraphObservation with final reward
 ```
 
-The environment enforces two hard budget limits: a **turn cap** and a **token budget**. When either is exhausted, the episode ends immediately (reward is whatever has accumulated to that point — not a bonus, not a penalty on its own).
+The environment enforces two hard budget limits: a **turn cap** and a **token budget**. When either is exhausted, the episode ends and a `_forced_terminal_reward` is computed — materializing fresh if no cache exists, then delegating to `terminal_reward` with whatever test results and mypy state are available. Agents that exhaust their budget without submitting still receive a meaningful gradient signal rather than silence.
 
 ---
 
@@ -26,18 +26,18 @@ The environment enforces two hard budget limits: a **turn cap** and a **token bu
 
 The environment maintains one `GraphForgeState` per live episode. Its key fields:
 
-| Field                   | Type                               | Description                                                            |
-| ----------------------- | ---------------------------------- | ---------------------------------------------------------------------- |
-| `graph`                 | `GraphState`                       | The graph being built: modules, nodes, edges                           |
-| `task_spec`             | `TaskSpec`                         | The task to solve (constraints + behavioral tests)                     |
-| `turn_cap`              | `int`                              | Maximum steps allowed                                                  |
-| `token_budget`          | `int`                              | Maximum tokens (action + observation) allowed                          |
-| `tokens_used`           | `int`                              | Running total of tokens consumed                                       |
-| `cumulative_reward`     | `float`                            | Running reward sum (per-turn penalties accumulate here)                |
-| `is_terminal`           | `bool`                             | Set to `True` when the episode ends                                    |
-| `materialization_cache` | `dict[str, str] \| None`           | Python source per module from the last `materialize_and_validate` call |
-| `last_test_results`     | `list[TestResult] \| None`         | Results from the last `run_behavioral_tests` call                      |
-| `action_history`        | `list[(action_type, params_json)]` | Used to detect repeat actions                                          |
+| Field                   | Type                               | Description                                                                                                                               |
+| ----------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `graph`                 | `GraphState`                       | The graph being built: modules, nodes, edges                                                                                              |
+| `task_spec`             | `TaskSpec`                         | The task to solve (constraints + behavioral tests)                                                                                        |
+| `turn_cap`              | `int`                              | Maximum steps allowed                                                                                                                     |
+| `token_budget`          | `int`                              | Maximum tokens (action + observation) allowed                                                                                             |
+| `tokens_used`           | `int`                              | Running total of tokens consumed                                                                                                          |
+| `cumulative_reward`     | `float`                            | Running reward sum (per-turn penalties accumulate here)                                                                                   |
+| `is_terminal`           | `bool`                             | Set to `True` when the episode ends                                                                                                       |
+| `materialization_cache` | `dict[str, str] \| None`           | Python source per module from the last `materialize_and_validate` call; cleared to `None` by the dispatcher after any successful mutation |
+| `last_test_results`     | `list[TestResult] \| None`         | Results from the last `run_behavioral_tests` call                                                                                         |
+| `action_history`        | `list[(action_type, params_json)]` | Used to detect repeat actions                                                                                                             |
 
 ### `GraphState` (the graph itself)
 
@@ -143,29 +143,30 @@ The environment delegates all heavy lifting to eight engine components wired tog
 
 ### Per-Turn (applied every step)
 
-| Event                                   | Delta                     |
-| --------------------------------------- | ------------------------- |
-| Base step cost                          | −0.1                      |
-| Token cost                              | −0.001 × tokens_this_turn |
-| Failed mutation                         | −2.0                      |
-| Repeat action (identical type + params) | −1.0                      |
-| Malformed / unknown action              | −2.1 (base + fail)        |
+| Event                                   | Delta                        |
+| --------------------------------------- | ---------------------------- |
+| Base step cost                          | −0.1                         |
+| Token cost                              | −0.001 × tokens_this_turn    |
+| Successful non-repeat action            | +0.05 (net: −0.05)           |
+| Failed mutation                         | −0.5 (net: −0.6)             |
+| Repeat action (identical type + params) | −1.0                         |
+| Malformed / unknown action              | −2.1 (base + −2.0 MALFORMED) |
 
 ### Terminal (applied once at `submit`)
 
 Terminal reward replaces nothing — it adds on top of whatever cumulative reward has accumulated.
 
-| Component                                                   | Value                                     |
-| ----------------------------------------------------------- | ----------------------------------------- |
-| Materialization fails                                       | −8.0 flat (no further scoring)            |
-| Each visible structural constraint satisfied                | +1.0                                      |
-| All visible structural constraints satisfied                | +5.0 bonus                                |
-| Each behavioral test passed                                 | +3.0                                      |
-| All behavioral tests passed                                 | +5.0 bonus                                |
-| mypy passes with zero errors                                | +3.0                                      |
-| Token efficiency (only if all structural + behavioral pass) | up to +5.0 × fraction of budget remaining |
+| Component                                                   | Value                                                                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Materialization fails                                       | −8.0 to −4.0 (partial credit: −8.0 + 4.0 × ok_modules/total_modules; fully broken graph = −8.0, one bad module in many ≈ −4.0) |
+| Each visible structural constraint satisfied                | +1.0                                                                                                                           |
+| All visible structural constraints satisfied                | +5.0 bonus                                                                                                                     |
+| Each behavioral test passed                                 | +3.0                                                                                                                           |
+| All behavioral tests passed                                 | +5.0 bonus                                                                                                                     |
+| mypy passes with zero errors                                | +3.0                                                                                                                           |
+| Token efficiency (only if all structural + behavioral pass) | up to +5.0 × fraction of budget remaining                                                                                      |
 
-Hidden constraints are evaluated at submit but their individual results are **never revealed to the agent** — not during the episode, not in the final observation. The `ConstraintSummary` in every observation exposes the _count_ of hidden constraints (`summary.hidden`) and the total count (`summary.total`), but no per-constraint satisfaction status for hidden ones is ever returned. Critically, the terminal reward formula filters to **visible constraints only** when computing the +1.0-per-satisfied and +5.0-all-satisfied bonuses; hidden structural constraints are evaluated internally but add nothing to the numerical reward regardless of whether they pass or fail. See the [Hidden Constraints](#hidden-constraints) section for the full breakdown.
+Hidden constraints are evaluated at submit but their individual results are **never revealed to the agent** — not during the episode, not in the final observation. The `ConstraintSummary` in every observation exposes the _count_ of hidden constraints (`summary.hidden`) and the total count (`summary.total`), but no per-constraint satisfaction status for hidden ones is ever returned. The terminal reward formula operates on **whatever constraints the caller passes**; `_handle_submit` and `_forced_terminal_reward` are responsible for filtering to visible-only before calling `terminal_reward` — the reward engine itself no longer silently strips hidden constraints. Hidden structural constraints are evaluated separately via `check_all` and their results are surfaced in the submit response as `hidden_constraints_satisfied` / `hidden_constraints_total` — analysis-only metadata that does not touch the reward. See the [Hidden Constraints](#hidden-constraints) section for the full breakdown.
 
 ---
 
@@ -173,21 +174,22 @@ Hidden constraints are evaluated at submit but their individual results are **ne
 
 Every call to `step()` or `reset()` returns a `GraphObservation`. Its fields:
 
-| Field                    | Type                   | Description                                                                                             |
-| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| `done`                   | `bool`                 | `True` when the episode has ended                                                                       |
-| `reward`                 | `float \| None`        | Cumulative reward — only populated when `done=True`                                                     |
-| `episode_id`             | `str`                  | UUID for this episode                                                                                   |
-| `timestep`               | `int`                  | Current step count                                                                                      |
-| `turn_budget_remaining`  | `int`                  | Steps left before forced termination                                                                    |
-| `token_budget_remaining` | `int`                  | Tokens left before forced termination                                                                   |
-| `graph_state`            | `GraphState`           | Full current graph (modules, nodes, edges)                                                              |
-| `last_action_result`     | `ActionResult \| None` | Success/failure + optional query response for the action just taken                                     |
-| `constraint_summary`     | `ConstraintSummary`    | Counts: total, visible, hidden, satisfied-visible                                                       |
-| `visible_constraints`    | `list[ConstraintSpec]` | The non-hidden constraints the agent can check against                                                  |
-| `available_actions`      | `list[str]`            | Current valid action types (`run_behavioral_tests` is absent until `materialize_and_validate` succeeds) |
-| `task_description`       | `str`                  | Natural-language description of what the task requires                                                  |
-| `metadata`               | `dict`                 | `tokens_used` and `step_count`                                                                          |
+| Field                     | Type                     | Description                                                                                                                             |
+| ------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `done`                    | `bool`                   | `True` when the episode has ended                                                                                                       |
+| `reward`                  | `float \| None`          | Cumulative reward — only populated when `done=True`                                                                                     |
+| `episode_id`              | `str`                    | UUID for this episode                                                                                                                   |
+| `timestep`                | `int`                    | Current step count                                                                                                                      |
+| `turn_budget_remaining`   | `int`                    | Steps left before forced termination                                                                                                    |
+| `token_budget_remaining`  | `int`                    | Tokens left before forced termination                                                                                                   |
+| `graph_state`             | `GraphState`             | Full current graph (modules, nodes, edges)                                                                                              |
+| `last_action_result`      | `ActionResult \| None`   | Success/failure + optional query response for the action just taken                                                                     |
+| `constraint_summary`      | `ConstraintSummary`      | Counts: total, visible, hidden, satisfied-visible                                                                                       |
+| `visible_constraints`     | `list[ConstraintStatus]` | The non-hidden constraints with per-constraint satisfaction status (`ConstraintStatus` extends `ConstraintSpec` with `satisfied: bool`) |
+| `repeated_action_warning` | `bool`                   | `True` when the most recent action was an exact repeat (type + params match); repeat penalty already applied                            |
+| `available_actions`       | `list[str]`              | Current valid action types (`run_behavioral_tests` is absent until `materialize_and_validate` succeeds)                                 |
+| `task_description`        | `str`                    | Natural-language description of what the task requires                                                                                  |
+| `metadata`                | `dict`                   | `tokens_used` and `step_count`                                                                                                          |
 
 ---
 
@@ -197,11 +199,11 @@ Tasks are drawn from a `TaskBank` of ~52 pre-built specs across three tiers. A t
 
 ### Tiers
 
-| Tier | Nodes | Modules | Constraints | Hidden | Behavioral Tests | Turn Cap | Token Budget |
-| ---- | ----- | ------- | ----------- | ------ | ---------------- | -------- | ------------ |
-| 1    | 5–8   | 1–2     | ~15         | ~30%   | 0–2              | 20       | 4,000        |
-| 2    | 10–18 | 3–4     | ~30         | ~35%   | 3–5              | 35       | 8,000        |
-| 3    | 18–30 | 5–7     | ~50         | ~40%   | 5–8              | 55       | 14,000       |
+| Tier | Nodes | Modules | Constraints | Hidden  | Behavioral Tests | Turn Cap | Token Budget |
+| ---- | ----- | ------- | ----------- | ------- | ---------------- | -------- | ------------ |
+| 1    | 5–8   | 1–2     | ~15         | ~30%    | 0–2              | 20       | 4,000        |
+| 2    | 10–18 | 3–4     | ~30         | ~35%    | 3–5              | 35       | 8,000        |
+| 3    | 18–30 | 5–7     | ~50         | ~24–27% | 5–8              | 55       | 14,000       |
 
 ### Tier 1 Templates (4 templates × 4 variants = 16 tasks)
 
@@ -209,6 +211,8 @@ Tasks are drawn from a `TaskBank` of ~52 pre-built specs across three tiers. A t
 - **validator_chain** — single-module boolean validators (email, phone, url, password)
 - **transform_reduce** — single-module map-filter-reduce (sales, logs, inventory, scores)
 - **config_loader** — single-module config loading with defaults and validation
+
+Variants 0/1 differ cosmetically (domain swap only). Variants 2/3 require at least one `edge_exists` constraint (variant 3 requires two), so a one-pass node-dump that solves v0/v1 will not satisfy v2/v3.
 
 ### Tier 2 Templates (6 templates × 4 variants = 24 tasks)
 
@@ -247,14 +251,14 @@ The `visible_constraints` list in every observation contains only non-hidden con
 
 ### How Hidden Constraints Interact with Reward
 
-Hidden constraints do **not** add to or subtract from the terminal reward. The `RewardEngine.terminal_reward` method explicitly filters to `visible` constraints before computing the +1.0-per-constraint and +5.0-all-satisfied bonuses. This means:
+Hidden constraints do **not** add to or subtract from the terminal reward. `RewardEngine.terminal_reward` treats its `constraints` argument as authoritative — it applies whatever is passed without re-filtering. The callers (`_handle_submit` and `_forced_terminal_reward`) are responsible for passing only visible constraints. Hidden constraints are evaluated separately and reported as metadata only. This means:
 
 - Satisfying a hidden structural constraint: **no reward effect**
 - Violating a hidden structural constraint: **no reward effect**
 - The all-structural bonus (+5.0) is gated only on visible constraints all being satisfied
 - Behavioral tests and mypy are not subject to the hidden filter — all tests and the type-check bonus apply regardless
 
-Hidden constraints exist as an **evaluation signal** for benchmarking and analysis, not as a training signal for the agent.
+Hidden constraints exist as an **evaluation signal** for benchmarking and analysis, not as a training signal for the agent. Their aggregate satisfaction (`hidden_constraints_satisfied` / `hidden_constraints_total`) is surfaced in the submit response for offline analysis.
 
 ### Complete Constraint Kind Reference
 
@@ -329,11 +333,11 @@ Visible: All Tier 1 visible kinds, plus primary `edge_exists` between modules (f
 
 Hidden: All Tier 1 hidden kinds, plus `type_consistency`, cross-module `edge_exists` (secondary data-flow edges), secondary `module_responsibility` (e.g. the middle `transform` module), `internal_only`, `module_size_max`, secondary `error_handling_present` on output-side functions
 
-**Tier 3 (~40% hidden, ~18–22 hidden per task)**
+**Tier 3 (~24–27% hidden, ~12–14 hidden per task)**
 
-Visible: Core structural skeleton — which modules exist, primary responsibility tags, main entrypoint, primary `pure_function`, primary `return_type`, primary `error_handling_present`, `module_size_max` for one module
+Visible: Core structural skeleton — which modules exist, all module responsibility tags (`module_responsibility` for every module is now visible so agents always know what each module is for), main entrypoint, primary `pure_function`, primary `return_type`, primary `error_handling_present`, `module_size_max` for one module, `no_any_types` (basic coding hygiene), critical-path `edge_exists` (the entry-point chain defining the architecture)
 
-Hidden: All Tier 2 hidden kinds, plus all cross-layer `edge_exists` (auth→core, core→storage, etc.), `internal_only` for internal-facing storage/lifecycle functions, `fan_in_max`/`fan_out_max` on orchestration nodes, secondary `pure_function` on all pure helpers, `error_handling_absent` on pure functions that must not trap errors
+Hidden: `type_consistency`, `dag_depth_max`, `fan_in_max`/`fan_out_max`, `internal_only`, `error_handling_absent` on pure functions — all legitimately discovery-through-iteration constraints
 
 ---
 
@@ -355,17 +359,18 @@ Hidden: All Tier 2 hidden kinds, plus all cross-layer `edge_exists` (auth→core
    │   └── Restore snapshot if handler returns success=False
    ├── Accumulate per-turn reward
    ├── Increment step_count
-   ├── Check turn_cap → mark terminal if reached
-   ├── Check token_budget → mark terminal if exceeded
+   ├── Check turn_cap → if reached: run _forced_terminal_reward, mark terminal
+   ├── Check token_budget → if exceeded: run _forced_terminal_reward, mark terminal
    ├── Build GraphObservation (includes updated graph, constraint summary, result)
    └── Count observation tokens → add to tokens_used
 
 3. submit (via step with action_type="submit")
-   ├── Materialize graph if not already cached
-   ├── Run mypy on materialized source
+   ├── Always materialize fresh (ignores any existing cache)
+   ├── Run mypy on fresh materialized source
    ├── Run behavioral tests
-   ├── Evaluate all constraints (including hidden)
-   ├── Compute terminal reward
+   ├── Split constraints: visible → terminal_reward; hidden → check_all (metadata only)
+   ├── Compute terminal reward (visible constraints only)
+   ├── Add hidden_constraints_satisfied / hidden_constraints_total to query_response
    ├── Set is_terminal = True
    └── Return final GraphObservation with done=True and reward=cumulative
 ```
