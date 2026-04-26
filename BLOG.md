@@ -98,7 +98,7 @@ The incentive structure pushes the agent toward _targeted exploration and clean 
 
 ---
 
-## Proven Gains: Training GRPO on a Small Model
+## Proven Gains: Training a Small Model to Think in Graphs
 
 We trained **Qwen2.5-3B-Instruct** using **GRPO (Group Relative Policy Optimization)** with LoRA fine-tuning (r=16, α=32).
 

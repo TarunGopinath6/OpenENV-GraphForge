@@ -1,3 +1,12 @@
+---
+title: OpenENV GraphForge
+emoji: 🌐
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # GraphForge
 
 **A graph-first code-editing RL environment for Python repositories, built on [OpenEnv](https://github.com/meta-pytorch/OpenEnv).**
